@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/image_capture_service.dart';
 import '../../../core/services/image_storage_service.dart';
+import '../../../core/widgets/safe_back_button.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/customer_providers.dart';
 import '../domain/customer.dart';
@@ -33,8 +34,26 @@ class _CustomerEditorScreenState extends ConsumerState<CustomerEditorScreen> {
   String? _frontPath;
   String? _backPath;
   bool _loading = false;
+  bool _allowPop = false;
 
   bool get isEditing => widget.customerId != null;
+
+  bool get _hasUnsavedChanges {
+    if (_customer == null) {
+      return _nameController.text.trim().isNotEmpty ||
+          _addressController.text.trim().isNotEmpty ||
+          _phoneController.text.trim().isNotEmpty ||
+          _notesController.text.trim().isNotEmpty ||
+          _frontPath != null ||
+          _backPath != null;
+    }
+    return _nameController.text.trim() != _customer!.fullName ||
+        _addressController.text.trim() != _customer!.address ||
+        _phoneController.text.trim() != (_customer!.phone ?? '') ||
+        _notesController.text.trim() != (_customer!.notes ?? '') ||
+        _frontPath != _customer!.idPhotoFrontPath ||
+        _backPath != _customer!.idPhotoBackPath;
+  }
 
   @override
   void initState() {
@@ -179,7 +198,7 @@ class _CustomerEditorScreenState extends ConsumerState<CustomerEditorScreen> {
       );
       if (choice == _DuplicateChoice.openExisting) {
         if (mounted) {
-          context.go('/customers/${duplicates.first.id}');
+          context.pushReplacement('/customers/${duplicates.first.id}');
         }
         return;
       }
@@ -214,7 +233,7 @@ class _CustomerEditorScreenState extends ConsumerState<CustomerEditorScreen> {
             );
       _newlySavedPaths.clear();
       if (mounted) {
-        context.go('/customers/${customer.id}');
+        context.pushReplacement('/customers/${customer.id}');
       }
     } catch (error) {
       await _deleteNewOrphans();
@@ -236,6 +255,49 @@ class _CustomerEditorScreenState extends ConsumerState<CustomerEditorScreen> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _handleBack() async {
+    if (!_hasUnsavedChanges) {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/');
+      }
+      return;
+    }
+    final discard = await _confirmDiscard();
+    if (!discard || !mounted) {
+      return;
+    }
+    _allowPop = true;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
+    }
+  }
+
+  Future<bool> _confirmDiscard() async {
+    final l10n = AppLocalizations.of(context)!;
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.discardChangesTitle),
+            content: Text(l10n.discardChangesMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.keepEditing),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n.discardChanges),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   String? _nameError(String? value) => value == null || value.trim().isEmpty
@@ -260,108 +322,129 @@ class _CustomerEditorScreenState extends ConsumerState<CustomerEditorScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return PopScope(
+        canPop: _allowPop,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            _handleBack();
+          }
+        },
+        child: const Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? l10n.editCustomer : l10n.addCustomer),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: l10n.fullName),
-              validator: _nameError,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _addressController,
-              decoration: InputDecoration(labelText: l10n.address),
-              validator: _addressError,
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _phoneController,
-              decoration: InputDecoration(
-                labelText: '${l10n.phone} (${l10n.optional})',
+    return PopScope(
+      canPop: _allowPop || !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _handleBack();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditing ? l10n.editCustomer : l10n.addCustomer),
+          leading: SafeBackButton(onPressed: _handleBack),
+        ),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _nameController,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(labelText: l10n.fullName),
+                validator: _nameError,
               ),
-              keyboardType: TextInputType.phone,
-              validator: _phoneError,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _notesController,
-              decoration: InputDecoration(
-                labelText: '${l10n.notes} (${l10n.optional})',
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _addressController,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(labelText: l10n.address),
+                validator: _addressError,
+                maxLines: 2,
               ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.idPhotoFront,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(l10n.photoPrivacyNote),
-            const SizedBox(height: 8),
-            _PhotoPreview(
-              path: _frontPath,
-              storage: ref.read(imageStorageServiceProvider),
-            ),
-            Wrap(
-              spacing: 12,
-              children: [
-                OutlinedButton.icon(
-                  key: const ValueKey('customer_front_photo_button'),
-                  onPressed: () => _captureFront(source: ImageSource.camera),
-                  icon: const Icon(Icons.camera_alt_outlined),
-                  label: Text(
-                    _frontPath == null ? l10n.takePhoto : l10n.retakePhoto,
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneController,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: '${l10n.phone} (${l10n.optional})',
+                ),
+                keyboardType: TextInputType.phone,
+                validator: _phoneError,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _notesController,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: '${l10n.notes} (${l10n.optional})',
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                l10n.idPhotoFront,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(l10n.photoPrivacyNote),
+              const SizedBox(height: 8),
+              _PhotoPreview(
+                path: _frontPath,
+                storage: ref.read(imageStorageServiceProvider),
+              ),
+              Wrap(
+                spacing: 12,
+                children: [
+                  OutlinedButton.icon(
+                    key: const ValueKey('customer_front_photo_button'),
+                    onPressed: () => _captureFront(source: ImageSource.camera),
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: Text(
+                      _frontPath == null ? l10n.takePhoto : l10n.retakePhoto,
+                    ),
                   ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => _captureFront(source: ImageSource.gallery),
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: Text(l10n.chooseFromGallery),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              '${l10n.idPhotoBack} (${l10n.optional})',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            _PhotoPreview(
-              path: _backPath,
-              storage: ref.read(imageStorageServiceProvider),
-            ),
-            Wrap(
-              spacing: 12,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => _captureBack(source: ImageSource.camera),
-                  icon: const Icon(Icons.camera_alt_outlined),
-                  label: Text(l10n.takePhoto),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => _captureBack(source: ImageSource.gallery),
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: Text(l10n.chooseFromGallery),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            FilledButton(
-              key: const ValueKey('customer_save_button'),
-              onPressed: _save,
-              child: Text(l10n.save),
-            ),
-          ],
+                  OutlinedButton.icon(
+                    onPressed: () => _captureFront(source: ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: Text(l10n.chooseFromGallery),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                '${l10n.idPhotoBack} (${l10n.optional})',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              _PhotoPreview(
+                path: _backPath,
+                storage: ref.read(imageStorageServiceProvider),
+              ),
+              Wrap(
+                spacing: 12,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => _captureBack(source: ImageSource.camera),
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: Text(l10n.takePhoto),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _captureBack(source: ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: Text(l10n.chooseFromGallery),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              FilledButton(
+                key: const ValueKey('customer_save_button'),
+                onPressed: _save,
+                child: Text(l10n.save),
+              ),
+            ],
+          ),
         ),
       ),
     );

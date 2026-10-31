@@ -18,3 +18,4 @@
 - Widget tests use fake repositories; real Drift only in plain unit tests (FakeAsync incompatibility).
 - Customers derive `isActive` from the existing `voidedAt` column, so the Customer schema remains unchanged; ID photos use relative paths in the private documents directory and are never deleted.
 - Customer photo replacements write a separate audit entry containing the old and new file paths.
+- Navigation uses push for stacked feature screens; customer photo replacement keeps old files and audits every replacement. image_picker uses the system camera app, so no CAMERA permission is declared.

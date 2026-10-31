@@ -114,6 +114,60 @@ class DriftCustomerRepository implements CustomerRepository {
   }
 
   @override
+  Future<Customer> replaceIdPhoto(
+    String customerId,
+    CustomerPhotoSide side,
+    String newRelativePath,
+  ) async {
+    final path = newRelativePath.trim();
+    if (path.isEmpty) {
+      throw const CustomerValidationException('Photo path is required.');
+    }
+    return database.transaction(() async {
+      final old = await getById(customerId);
+      if (old == null) {
+        throw const CustomerValidationException('Customer not found.');
+      }
+      final oldPath = side == CustomerPhotoSide.front
+          ? old.idPhotoFrontPath
+          : old.idPhotoBackPath;
+      final updatedAt = DateTime.now().toUtc();
+      final updated = side == CustomerPhotoSide.front
+          ? old.copyWith(idPhotoFrontPath: path, updatedAt: updatedAt)
+          : old.copyWith(idPhotoBackPath: path, updatedAt: updatedAt);
+      final companion = side == CustomerPhotoSide.front
+          ? db.CustomersCompanion(
+              idPhotoFront: Value(path),
+              updatedAt: Value(updatedAt),
+            )
+          : db.CustomersCompanion(
+              idPhotoBack: Value(path),
+              updatedAt: Value(updatedAt),
+            );
+      await (database.update(
+        database.customers,
+      )..where((table) => table.id.equals(customerId))).write(companion);
+      await database
+          .into(database.auditLogs)
+          .insert(
+            db.AuditLogsCompanion.insert(
+              id: _uuidV4(),
+              createdAt: updatedAt,
+              updatedAt: updatedAt,
+              entityType: 'customer',
+              entityId: customerId,
+              action: 'idPhotoReplaced',
+              oldValue: Value(jsonEncode({'side': side.name, 'path': oldPath})),
+              newValue: Value(jsonEncode({'side': side.name, 'path': path})),
+              at: updatedAt,
+              by: 'local-user',
+            ),
+          );
+      return updated;
+    });
+  }
+
+  @override
   Future<Customer> setActive(String id, bool isActive) async {
     final old = await getById(id);
     if (old == null) {

@@ -212,4 +212,40 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get phoneCharactersError => 'ስልክ አሃዞች፣ ክፍተት፣ + እና - ብቻ ሊይዝ ይችላል።';
+
+  @override
+  String get discardChangesTitle => 'ለውጦችን ይተዉ?';
+
+  @override
+  String get replacePhoto => 'ፎቶ ይተካ';
+
+  @override
+  String get discardChangesMessage => 'ያልተቀመጡ ለውጦች ይጠፋሉ።';
+
+  @override
+  String get discardChanges => 'ይተዉ';
+
+  @override
+  String get keepEditing => 'ማስተካከል ይቀጥሉ';
+
+  @override
+  String get retakeFrontPhoto => 'የፊት ፎቶን እንደገና ያንሱ';
+
+  @override
+  String get addBackPhoto => 'የኋላ ፎቶ ያክሉ';
+
+  @override
+  String get retakeBackPhoto => 'የኋላ ፎቶን እንደገና ያንሱ';
+
+  @override
+  String get replacePhotoTitle => 'ፎቶ ይተካ?';
+
+  @override
+  String get replacePhotoMessage => 'የአሁኑ ፎቶ በታሪክ ውስጥ ይቀመጣል።';
+
+  @override
+  String get photoReplaced => 'ፎቶው ተተክቷል።';
+
+  @override
+  String get photoReplacementError => 'ፎቶውን መተካት አልተቻለም።';
 }

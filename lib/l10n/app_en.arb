@@ -67,5 +67,17 @@
   "continueSaving": "Continue saving",
   "saveCustomerError": "Could not save customer.",
   "phoneLengthError": "Phone must contain 7 to 15 digits.",
-  "phoneCharactersError": "Phone may contain only digits, spaces, +, and -."
+  "phoneCharactersError": "Phone may contain only digits, spaces, +, and -.",
+  "discardChangesTitle": "Discard changes?",
+  "replacePhoto": "Replace photo",
+  "discardChangesMessage": "Your unsaved changes will be lost.",
+  "discardChanges": "Discard",
+  "keepEditing": "Keep editing",
+  "retakeFrontPhoto": "Retake front photo",
+  "addBackPhoto": "Add back photo",
+  "retakeBackPhoto": "Retake back photo",
+  "replacePhotoTitle": "Replace photo?",
+  "replacePhotoMessage": "The current photo will be kept in history.",
+  "photoReplaced": "Photo replaced.",
+  "photoReplacementError": "Could not replace the photo."
 }

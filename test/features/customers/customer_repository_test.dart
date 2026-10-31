@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:t2_rental/core/database/database.dart';
 import 'package:t2_rental/features/customers/data/customer_repository.dart';
+import 'package:t2_rental/features/customers/domain/customer_repository.dart';
 
 void main() {
   late AppDatabase database;
@@ -120,5 +121,31 @@ void main() {
     expect((await repository.watchAll('abebe').first), hasLength(1));
     expect((await repository.watchAll('0911').first), hasLength(1));
     expect((await repository.watchAll('addis').first), hasLength(1));
+  });
+
+  test('replaces an ID photo and records the old and new paths', () async {
+    final created = await repository.create(
+      fullName: 'Abebe Kebede',
+      address: 'Addis Ababa',
+      idPhotoFrontPath: 'customer_ids/old-front.jpg',
+    );
+    final before = DateTime.now().toUtc();
+
+    final updated = await repository.replaceIdPhoto(
+      created.id,
+      CustomerPhotoSide.front,
+      'customer_ids/new-front.jpg',
+    );
+
+    expect(updated.idPhotoFrontPath, 'customer_ids/new-front.jpg');
+    expect(updated.updatedAt.isUtc, isTrue);
+    expect(updated.updatedAt.isAfter(before), isTrue);
+    final audit = (await database.select(database.auditLogs).get()).singleWhere(
+      (item) => item.action == 'idPhotoReplaced',
+    );
+    expect(jsonDecode(audit.oldValue!)['side'], 'front');
+    expect(jsonDecode(audit.oldValue!)['path'], 'customer_ids/old-front.jpg');
+    expect(jsonDecode(audit.newValue!)['side'], 'front');
+    expect(jsonDecode(audit.newValue!)['path'], 'customer_ids/new-front.jpg');
   });
 }

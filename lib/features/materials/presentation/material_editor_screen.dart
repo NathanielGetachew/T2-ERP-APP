@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/money_parser.dart';
+import '../../../core/widgets/safe_back_button.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/material_providers.dart';
 import '../data/material_repository.dart';
@@ -26,8 +27,29 @@ class _MaterialEditorScreenState extends ConsumerState<MaterialEditorScreen> {
   RentalMaterial? _material;
   bool _active = true;
   bool _loadingMaterial = false;
+  bool _allowPop = false;
 
   bool get isEditing => widget.materialId != null;
+
+  bool get _hasUnsavedChanges {
+    if (_material == null) {
+      return _category.text.trim() != 'Panel' ||
+          _name.text.trim().isNotEmpty ||
+          _price.text.trim().isNotEmpty ||
+          _stock.text.trim().isNotEmpty;
+    }
+    return _category.text.trim() != _material!.category ||
+        _name.text.trim() != _material!.name ||
+        _price.text.trim() != _formatPrice(_material!.pricePerDay) ||
+        _stock.text.trim() != (_material!.totalStock?.toString() ?? '') ||
+        _active != _material!.isActive;
+  }
+
+  String _formatPrice(int minorUnits) {
+    final birr = minorUnits ~/ 100;
+    final santim = (minorUnits % 100).toString().padLeft(2, '0');
+    return '$birr.$santim';
+  }
 
   @override
   void initState() {
@@ -111,7 +133,7 @@ class _MaterialEditorScreenState extends ConsumerState<MaterialEditorScreen> {
         );
       }
       if (mounted) {
-        context.go('/materials');
+        context.pushReplacement('/materials');
       }
     } catch (error) {
       if (!mounted) {
@@ -122,6 +144,44 @@ class _MaterialEditorScreenState extends ConsumerState<MaterialEditorScreen> {
           : l10n.saveMaterialError;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  Future<void> _handleBack() async {
+    if (!_hasUnsavedChanges) {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/');
+      }
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.discardChangesTitle),
+        content: Text(l10n.discardChangesMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.keepEditing),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.discardChanges),
+          ),
+        ],
+      ),
+    );
+    if (discard != true || !mounted) {
+      return;
+    }
+    _allowPop = true;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
     }
   }
 
@@ -136,91 +196,119 @@ class _MaterialEditorScreenState extends ConsumerState<MaterialEditorScreen> {
           orElse: () => ['Panel'],
         );
     if (_loadingMaterial) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return PopScope(
+        canPop: _allowPop,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            _handleBack();
+          }
+        },
+        child: const Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? l10n.editMaterial : l10n.addMaterial),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Autocomplete<String>(
-              initialValue: TextEditingValue(text: _category.text),
-              optionsBuilder: (value) => existingCategories.where(
-                (option) =>
-                    option.toLowerCase().contains(value.text.toLowerCase()),
+    return PopScope(
+      canPop: _allowPop || !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _handleBack();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditing ? l10n.editMaterial : l10n.addMaterial),
+          leading: SafeBackButton(onPressed: _handleBack),
+        ),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Autocomplete<String>(
+                initialValue: TextEditingValue(text: _category.text),
+                optionsBuilder: (value) => existingCategories.where(
+                  (option) =>
+                      option.toLowerCase().contains(value.text.toLowerCase()),
+                ),
+                onSelected: (value) {
+                  _category.text = value;
+                  setState(() {});
+                },
+                fieldViewBuilder:
+                    (context, controller, focusNode, onSubmitted) {
+                      controller.text = _category.text;
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        onChanged: (value) {
+                          _category.text = value;
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(labelText: l10n.category),
+                        validator: (value) =>
+                            _required(value, l10n.categoryRequired),
+                      );
+                    },
               ),
-              onSelected: (value) => _category.text = value,
-              fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
-                controller.text = _category.text;
-                return TextFormField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  onChanged: (value) => _category.text = value,
-                  decoration: InputDecoration(labelText: l10n.category),
-                  validator: (value) => _required(value, l10n.categoryRequired),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _name,
-              decoration: InputDecoration(labelText: l10n.materialName),
-              validator: (value) => _required(value, l10n.nameRequired),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _price,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _name,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(labelText: l10n.materialName),
+                validator: (value) => _required(value, l10n.nameRequired),
               ),
-              decoration: InputDecoration(
-                labelText: l10n.pricePerDay,
-                suffixText: 'ETB',
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.priceRequired;
-                }
-                try {
-                  if (parseEtbMinorUnits(value) <= 0) {
-                    return l10n.priceMustBePositive;
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _price,
+                onChanged: (_) => setState(() {}),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.pricePerDay,
+                  suffixText: 'ETB',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n.priceRequired;
                   }
-                } on FormatException {
-                  return l10n.invalidNumber;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _stock,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: '${l10n.stock} (${l10n.optional})',
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
+                  try {
+                    if (parseEtbMinorUnits(value) <= 0) {
+                      return l10n.priceMustBePositive;
+                    }
+                  } on FormatException {
+                    return l10n.invalidNumber;
+                  }
                   return null;
-                }
-                final parsed = int.tryParse(value.trim());
-                return parsed == null || parsed < 0
-                    ? l10n.stockMustBeNonNegative
-                    : null;
-              },
-            ),
-            if (isEditing)
-              SwitchListTile(
-                title: Text(l10n.active),
-                value: _active,
-                onChanged: (value) => setState(() => _active = value),
+                },
               ),
-            const SizedBox(height: 24),
-            FilledButton(onPressed: _save, child: Text(l10n.save)),
-          ],
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _stock,
+                onChanged: (_) => setState(() {}),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: '${l10n.stock} (${l10n.optional})',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return null;
+                  }
+                  final parsed = int.tryParse(value.trim());
+                  return parsed == null || parsed < 0
+                      ? l10n.stockMustBeNonNegative
+                      : null;
+                },
+              ),
+              if (isEditing)
+                SwitchListTile(
+                  title: Text(l10n.active),
+                  value: _active,
+                  onChanged: (value) => setState(() => _active = value),
+                ),
+              const SizedBox(height: 24),
+              FilledButton(onPressed: _save, child: Text(l10n.save)),
+            ],
+          ),
         ),
       ),
     );

@@ -16,3 +16,4 @@
 - Widget tests use fake repositories; real Drift only in plain unit tests (FakeAsync incompatibility).
 - Added Phase 1 customer registration, private National ID photo storage/capture, duplicate warnings, profiles, archive/reactivate, and audit logging.
 - Customer widget tests now use stable control keys, a tall viewport, and explicit visibility before taps.
+- Added stack-safe navigation and independent, audited customer ID-photo replacement while preserving old photo files.

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/widgets/safe_back_button.dart';
 import '../application/locale_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -15,7 +15,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.settings),
-        leading: BackButton(onPressed: () => context.go('/')),
+        leading: const SafeBackButton(),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),

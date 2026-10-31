@@ -8,7 +8,7 @@ import '../features/materials/presentation/material_editor_screen.dart';
 import '../features/materials/presentation/materials_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 
-final appRouter = GoRouter(
+GoRouter createAppRouter() => GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
@@ -54,3 +54,5 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+final appRouter = createAppRouter();

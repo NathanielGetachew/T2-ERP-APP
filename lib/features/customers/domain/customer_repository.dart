@@ -1,5 +1,7 @@
 import 'customer.dart';
 
+enum CustomerPhotoSide { front, back }
+
 abstract interface class CustomerRepository {
   Stream<List<Customer>> watchAll(String query, {bool includeInactive = false});
 
@@ -15,6 +17,12 @@ abstract interface class CustomerRepository {
   });
 
   Future<Customer> update(Customer customer);
+
+  Future<Customer> replaceIdPhoto(
+    String customerId,
+    CustomerPhotoSide side,
+    String newRelativePath,
+  );
 
   Future<Customer> setActive(String id, bool isActive);
 

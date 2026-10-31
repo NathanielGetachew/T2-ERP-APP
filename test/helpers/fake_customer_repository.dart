@@ -3,13 +3,17 @@ import 'package:t2_rental/features/customers/domain/customer_repository.dart';
 import 'package:t2_rental/features/customers/domain/customer_validation.dart';
 
 class FakeCustomerRepository implements CustomerRepository {
-  FakeCustomerRepository([Iterable<Customer> initial = const []])
-    : _customers = initial.toList();
+  FakeCustomerRepository(
+    [Iterable<Customer> initial = const []], {
+    this.failPhotoReplacement = false,
+  }) : _customers = initial.toList();
 
   final List<Customer> _customers;
   final List<Customer> createCalls = [];
   final List<Customer> updateCalls = [];
+  final List<Customer> photoReplacementCalls = [];
   final List<String> activeChanges = [];
+  final bool failPhotoReplacement;
   int _nextId = 0;
 
   @override
@@ -71,6 +75,36 @@ class FakeCustomerRepository implements CustomerRepository {
     _customers[index] = customer;
     updateCalls.add(customer);
     return customer;
+  }
+
+  @override
+  Future<Customer> replaceIdPhoto(
+    String customerId,
+    CustomerPhotoSide side,
+    String newRelativePath,
+  ) async {
+    if (failPhotoReplacement) {
+      throw const CustomerValidationException('Photo replacement failed.');
+    }
+    final customer = await getById(customerId);
+    if (customer == null) {
+      throw const CustomerValidationException('Customer not found.');
+    }
+    if (newRelativePath.trim().isEmpty) {
+      throw const CustomerValidationException('Photo path is required.');
+    }
+    final updated = side == CustomerPhotoSide.front
+        ? customer.copyWith(
+            idPhotoFrontPath: newRelativePath.trim(),
+            updatedAt: DateTime.now().toUtc(),
+          )
+        : customer.copyWith(
+            idPhotoBackPath: newRelativePath.trim(),
+            updatedAt: DateTime.now().toUtc(),
+          );
+    _customers[_customers.indexOf(customer)] = updated;
+    photoReplacementCalls.add(updated);
+    return updated;
   }
 
   @override

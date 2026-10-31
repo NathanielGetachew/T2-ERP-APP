@@ -505,6 +505,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone may contain only digits, spaces, +, and -.'**
   String get phoneCharactersError;
+
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @replacePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace photo'**
+  String get replacePhoto;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your unsaved changes will be lost.'**
+  String get discardChangesMessage;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardChanges;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @retakeFrontPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake front photo'**
+  String get retakeFrontPhoto;
+
+  /// No description provided for @addBackPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add back photo'**
+  String get addBackPhoto;
+
+  /// No description provided for @retakeBackPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake back photo'**
+  String get retakeBackPhoto;
+
+  /// No description provided for @replacePhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace photo?'**
+  String get replacePhotoTitle;
+
+  /// No description provided for @replacePhotoMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The current photo will be kept in history.'**
+  String get replacePhotoMessage;
+
+  /// No description provided for @photoReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo replaced.'**
+  String get photoReplaced;
+
+  /// No description provided for @photoReplacementError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not replace the photo.'**
+  String get photoReplacementError;
 }
 
 class _AppLocalizationsDelegate

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/services/image_storage_service.dart';
+import '../../../core/widgets/safe_back_button.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/customer_providers.dart';
 import '../domain/customer.dart';
@@ -30,7 +31,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final l10n = AppLocalizations.of(context)!;
     final customers = ref.watch(customersProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.customers)),
+      appBar: AppBar(
+        title: Text(l10n.customers),
+        leading: const SafeBackButton(),
+      ),
       body: Column(
         children: [
           Padding(
@@ -82,7 +86,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/customers/new'),
+        onPressed: () => context.push('/customers/new'),
         icon: const Icon(Icons.person_add_alt_1),
         label: Text(l10n.addCustomer),
       ),
@@ -116,7 +120,7 @@ class _CustomerTile extends StatelessWidget {
             if (muted) l10n.archived,
           ].join('\n'),
         ),
-        onTap: () => context.go('/customers/${customer.id}'),
+        onTap: () => context.push('/customers/${customer.id}'),
       ),
     );
   }

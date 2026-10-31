@@ -215,4 +215,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get phoneCharactersError =>
       'Phone may contain only digits, spaces, +, and -.';
+
+  @override
+  String get discardChangesTitle => 'Discard changes?';
+
+  @override
+  String get replacePhoto => 'Replace photo';
+
+  @override
+  String get discardChangesMessage => 'Your unsaved changes will be lost.';
+
+  @override
+  String get discardChanges => 'Discard';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get retakeFrontPhoto => 'Retake front photo';
+
+  @override
+  String get addBackPhoto => 'Add back photo';
+
+  @override
+  String get retakeBackPhoto => 'Retake back photo';
+
+  @override
+  String get replacePhotoTitle => 'Replace photo?';
+
+  @override
+  String get replacePhotoMessage =>
+      'The current photo will be kept in history.';
+
+  @override
+  String get photoReplaced => 'Photo replaced.';
+
+  @override
+  String get photoReplacementError => 'Could not replace the photo.';
 }

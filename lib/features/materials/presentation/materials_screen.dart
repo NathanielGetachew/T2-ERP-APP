@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/safe_back_button.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/material_providers.dart';
 
@@ -27,7 +28,10 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final materials = ref.watch(materialsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.materials)),
+      appBar: AppBar(
+        title: Text(l10n.materials),
+        leading: const SafeBackButton(),
+      ),
       body: Column(
         children: [
           Padding(
@@ -93,7 +97,7 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
                                 ),
                               ),
                         onTap: () =>
-                            context.go('/materials/edit?id=${material.id}'),
+                            context.push('/materials/edit?id=${material.id}'),
                       ),
                     );
                   },
@@ -104,7 +108,7 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/materials/new'),
+        onPressed: () => context.push('/materials/new'),
         icon: const Icon(Icons.add),
         label: Text(l10n.addMaterial),
       ),
