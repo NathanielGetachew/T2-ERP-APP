@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/utils/money_parser.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../application/material_providers.dart';
+import '../data/material_repository.dart';
+import '../domain/rental_material.dart';
+
+class MaterialEditorScreen extends ConsumerStatefulWidget {
+  const MaterialEditorScreen({super.key, this.materialId});
+  final String? materialId;
+
+  @override
+  ConsumerState<MaterialEditorScreen> createState() =>
+      _MaterialEditorScreenState();
+}
+
+class _MaterialEditorScreenState extends ConsumerState<MaterialEditorScreen> {
+  final _category = TextEditingController(text: 'Panel');
+  final _name = TextEditingController();
+  final _price = TextEditingController();
+  final _stock = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  RentalMaterial? _material;
+  bool _active = true;
+  bool _loadingMaterial = false;
+
+  bool get isEditing => widget.materialId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.materialId != null) {
+      _loadMaterial();
+    }
+  }
+
+  Future<void> _loadMaterial() async {
+    setState(() => _loadingMaterial = true);
+    final material = await ref
+        .read(materialRepositoryProvider)
+        .getById(widget.materialId!);
+    if (!mounted) {
+      return;
+    }
+    if (material != null) {
+      _material = material;
+      _category.text = material.category;
+      _name.text = material.name;
+      final birr = material.pricePerDay ~/ 100;
+      final santim = (material.pricePerDay % 100).toString().padLeft(2, '0');
+      _price.text = '$birr.$santim';
+      _stock.text = material.totalStock?.toString() ?? '';
+      _active = material.isActive;
+    }
+    setState(() => _loadingMaterial = false);
+  }
+
+  @override
+  void dispose() {
+    _category.dispose();
+    _name.dispose();
+    _price.dispose();
+    _stock.dispose();
+    super.dispose();
+  }
+
+  String? _required(String? value, String message) =>
+      value == null || value.trim().isEmpty ? message : null;
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    int price;
+    int? stock;
+    try {
+      price = parseEtbMinorUnits(_price.text);
+      if (_stock.text.trim().isNotEmpty) {
+        stock = int.parse(_stock.text.trim());
+      }
+      if (stock != null && stock < 0) {
+        throw const FormatException();
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.invalidNumber)));
+      return;
+    }
+    final controller = ref.read(materialEditorProvider.notifier);
+    try {
+      if (_material == null) {
+        await controller.create(
+          category: _category.text,
+          name: _name.text,
+          pricePerDay: price,
+          totalStock: stock,
+        );
+      } else {
+        await controller.updateMaterial(
+          _material!.copyWith(
+            category: _category.text,
+            name: _name.text,
+            pricePerDay: price,
+            totalStock: stock,
+            isActive: _active,
+          ),
+        );
+      }
+      if (mounted) {
+        context.go('/materials');
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      final message = error is DuplicateMaterialException
+          ? l10n.duplicateMaterial
+          : l10n.saveMaterialError;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final existingCategories = ref
+        .watch(materialsProvider)
+        .maybeWhen(
+          data: (items) =>
+              {'Panel', ...items.map((item) => item.category)}.toList(),
+          orElse: () => ['Panel'],
+        );
+    if (_loadingMaterial) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isEditing ? l10n.editMaterial : l10n.addMaterial),
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Autocomplete<String>(
+              initialValue: TextEditingValue(text: _category.text),
+              optionsBuilder: (value) => existingCategories.where(
+                (option) =>
+                    option.toLowerCase().contains(value.text.toLowerCase()),
+              ),
+              onSelected: (value) => _category.text = value,
+              fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                controller.text = _category.text;
+                return TextFormField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  onChanged: (value) => _category.text = value,
+                  decoration: InputDecoration(labelText: l10n.category),
+                  validator: (value) => _required(value, l10n.categoryRequired),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _name,
+              decoration: InputDecoration(labelText: l10n.materialName),
+              validator: (value) => _required(value, l10n.nameRequired),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _price,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: l10n.pricePerDay,
+                suffixText: 'ETB',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return l10n.priceRequired;
+                }
+                try {
+                  if (parseEtbMinorUnits(value) <= 0) {
+                    return l10n.priceMustBePositive;
+                  }
+                } on FormatException {
+                  return l10n.invalidNumber;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _stock,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: '${l10n.stock} (${l10n.optional})',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return null;
+                }
+                final parsed = int.tryParse(value.trim());
+                return parsed == null || parsed < 0
+                    ? l10n.stockMustBeNonNegative
+                    : null;
+              },
+            ),
+            if (isEditing)
+              SwitchListTile(
+                title: Text(l10n.active),
+                value: _active,
+                onChanged: (value) => setState(() => _active = value),
+              ),
+            const SizedBox(height: 24),
+            FilledButton(onPressed: _save, child: Text(l10n.save)),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -21,6 +21,7 @@ class Customers extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('MaterialRow')
 class MaterialTypes extends Table {
   TextColumn get id => text()();
   DateTimeColumn get createdAt => dateTime()();

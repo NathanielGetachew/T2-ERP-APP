@@ -672,7 +672,7 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
 }
 
 class $MaterialTypesTable extends MaterialTypes
-    with TableInfo<$MaterialTypesTable, MaterialType> {
+    with TableInfo<$MaterialTypesTable, MaterialRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -794,7 +794,7 @@ class $MaterialTypesTable extends MaterialTypes
   static const String $name = 'material_types';
   @override
   VerificationContext validateIntegrity(
-    Insertable<MaterialType> instance, {
+    Insertable<MaterialRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -873,9 +873,9 @@ class $MaterialTypesTable extends MaterialTypes
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  MaterialType map(Map<String, dynamic> data, {String? tablePrefix}) {
+  MaterialRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MaterialType(
+    return MaterialRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -921,7 +921,7 @@ class $MaterialTypesTable extends MaterialTypes
   }
 }
 
-class MaterialType extends DataClass implements Insertable<MaterialType> {
+class MaterialRow extends DataClass implements Insertable<MaterialRow> {
   final String id;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -931,7 +931,7 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
   final int pricePerDay;
   final int? totalStock;
   final bool isActive;
-  const MaterialType({
+  const MaterialRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -979,12 +979,12 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
     );
   }
 
-  factory MaterialType.fromJson(
+  factory MaterialRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MaterialType(
+    return MaterialRow(
       id: serializer.fromJson<String>(json['id']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1012,7 +1012,7 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
     };
   }
 
-  MaterialType copyWith({
+  MaterialRow copyWith({
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -1022,7 +1022,7 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
     int? pricePerDay,
     Value<int?> totalStock = const Value.absent(),
     bool? isActive,
-  }) => MaterialType(
+  }) => MaterialRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1033,8 +1033,8 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
     totalStock: totalStock.present ? totalStock.value : this.totalStock,
     isActive: isActive ?? this.isActive,
   );
-  MaterialType copyWithCompanion(MaterialTypesCompanion data) {
-    return MaterialType(
+  MaterialRow copyWithCompanion(MaterialTypesCompanion data) {
+    return MaterialRow(
       id: data.id.present ? data.id.value : this.id,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1053,7 +1053,7 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
 
   @override
   String toString() {
-    return (StringBuffer('MaterialType(')
+    return (StringBuffer('MaterialRow(')
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1082,7 +1082,7 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MaterialType &&
+      (other is MaterialRow &&
           other.id == this.id &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1094,7 +1094,7 @@ class MaterialType extends DataClass implements Insertable<MaterialType> {
           other.isActive == this.isActive);
 }
 
-class MaterialTypesCompanion extends UpdateCompanion<MaterialType> {
+class MaterialTypesCompanion extends UpdateCompanion<MaterialRow> {
   final Value<String> id;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1135,7 +1135,7 @@ class MaterialTypesCompanion extends UpdateCompanion<MaterialType> {
        name = Value(name),
        pricePerDay = Value(pricePerDay),
        isActive = Value(isActive);
-  static Insertable<MaterialType> custom({
+  static Insertable<MaterialRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -4194,17 +4194,17 @@ class $$MaterialTypesTableTableManager
         RootTableManager<
           _$AppDatabase,
           $MaterialTypesTable,
-          MaterialType,
+          MaterialRow,
           $$MaterialTypesTableFilterComposer,
           $$MaterialTypesTableOrderingComposer,
           $$MaterialTypesTableAnnotationComposer,
           $$MaterialTypesTableCreateCompanionBuilder,
           $$MaterialTypesTableUpdateCompanionBuilder,
           (
-            MaterialType,
-            BaseReferences<_$AppDatabase, $MaterialTypesTable, MaterialType>,
+            MaterialRow,
+            BaseReferences<_$AppDatabase, $MaterialTypesTable, MaterialRow>,
           ),
-          MaterialType,
+          MaterialRow,
           PrefetchHooks Function()
         > {
   $$MaterialTypesTableTableManager(_$AppDatabase db, $MaterialTypesTable table)
@@ -4278,17 +4278,17 @@ typedef $$MaterialTypesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $MaterialTypesTable,
-      MaterialType,
+      MaterialRow,
       $$MaterialTypesTableFilterComposer,
       $$MaterialTypesTableOrderingComposer,
       $$MaterialTypesTableAnnotationComposer,
       $$MaterialTypesTableCreateCompanionBuilder,
       $$MaterialTypesTableUpdateCompanionBuilder,
       (
-        MaterialType,
-        BaseReferences<_$AppDatabase, $MaterialTypesTable, MaterialType>,
+        MaterialRow,
+        BaseReferences<_$AppDatabase, $MaterialTypesTable, MaterialRow>,
       ),
-      MaterialType,
+      MaterialRow,
       PrefetchHooks Function()
     >;
 typedef $$RentalsTableCreateCompanionBuilder = RentalsCompanion Function({

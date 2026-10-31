@@ -145,6 +145,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose language'**
   String get chooseLanguage;
+
+  /// No description provided for @materials.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get materials;
+
+  /// No description provided for @addMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Add material'**
+  String get addMaterial;
+
+  /// No description provided for @editMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit material'**
+  String get editMaterial;
+
+  /// No description provided for @searchMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Search materials'**
+  String get searchMaterials;
+
+  /// No description provided for @showInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inactive'**
+  String get showInactive;
+
+  /// No description provided for @noMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'No materials found.'**
+  String get noMaterials;
+
+  /// No description provided for @materialsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load materials.'**
+  String get materialsLoadError;
+
+  /// No description provided for @pricePerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Price per day'**
+  String get pricePerDay;
+
+  /// No description provided for @stock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get stock;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @materialName.
+  ///
+  /// In en, this message translates to:
+  /// **'Material name or variant'**
+  String get materialName;
+
+  /// No description provided for @categoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Category is required.'**
+  String get categoryRequired;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required.'**
+  String get nameRequired;
+
+  /// No description provided for @priceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Price is required.'**
+  String get priceRequired;
+
+  /// No description provided for @priceMustBePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Price must be greater than zero.'**
+  String get priceMustBePositive;
+
+  /// No description provided for @stockMustBeNonNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock cannot be negative.'**
+  String get stockMustBeNonNegative;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get optional;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @invalidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid non-negative number with up to two decimals.'**
+  String get invalidNumber;
+
+  /// No description provided for @duplicateMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'A material with this category and name already exists.'**
+  String get duplicateMaterial;
+
+  /// No description provided for @saveMaterialError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save material.'**
+  String get saveMaterialError;
 }
 
 class _AppLocalizationsDelegate
