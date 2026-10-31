@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:t2_rental/app/app.dart';
 import 'package:t2_rental/features/materials/application/material_providers.dart';
 import 'package:t2_rental/features/settings/application/locale_provider.dart';
+import 'package:t2_rental/features/rentals/application/rental_providers.dart';
 
 import 'helpers/fake_material_repository.dart';
+import 'helpers/fake_rental_repository.dart';
 import 'helpers/widget_test_helpers.dart';
 
 class _FakeLocaleController extends LocaleController {
@@ -22,11 +24,13 @@ class _FakeLocaleController extends LocaleController {
 void main() {
   testWidgets('app boots to Home', (WidgetTester tester) async {
     final repository = FakeMaterialRepository();
+    final rentalRepository = FakeRentalRepository();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           materialRepositoryProvider.overrideWithValue(repository),
+          rentalRepositoryProvider.overrideWithValue(rentalRepository),
           localeProvider.overrideWith(_FakeLocaleController.new),
         ],
         child: const T2RentalApp(),

@@ -12,6 +12,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/customer_providers.dart';
 import '../domain/customer.dart';
 import '../domain/customer_repository.dart';
+import '../../rentals/application/rental_providers.dart';
+import '../../rentals/domain/rental_number.dart';
 
 class CustomerDetailScreen extends ConsumerWidget {
   const CustomerDetailScreen({super.key, required this.customerId});
@@ -68,6 +70,7 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
     final l10n = AppLocalizations.of(context)!;
     final storage = ref.read(imageStorageServiceProvider);
     final customer = widget.customer;
+    final rentalHistory = ref.watch(rentalsByCustomerProvider(customer.id));
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -140,7 +143,29 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
         const SizedBox(height: 24),
         Text(l10n.rentalHistory, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
-        Text(l10n.noRentalHistory),
+        rentalHistory.when(
+          loading: () => const CircularProgressIndicator(),
+          error: (error, stack) => Text(error.toString()),
+          data: (rentals) => rentals.isEmpty
+              ? Text(l10n.noRentalHistory)
+              : Column(
+                  children: rentals
+                      .map(
+                        (details) => ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            formatRentalNumber(details.rental.rentalNumber),
+                          ),
+                          subtitle: Text(
+                            details.rental.rentedAt.toLocal().toString(),
+                          ),
+                          onTap: () =>
+                              context.push('/rentals/${details.rental.id}'),
+                        ),
+                      )
+                      .toList(),
+                ),
+        ),
         const SizedBox(height: 24),
         FilledButton.tonal(
           onPressed: () => _toggleActive(customer),

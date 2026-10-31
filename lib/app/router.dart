@@ -1,11 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/home/presentation/home_screen.dart';
 import '../features/customers/presentation/customer_detail_screen.dart';
 import '../features/customers/presentation/customer_editor_screen.dart';
 import '../features/customers/presentation/customers_screen.dart';
+import '../features/customers/domain/customer.dart';
 import '../features/materials/presentation/material_editor_screen.dart';
 import '../features/materials/presentation/materials_screen.dart';
+import '../features/rentals/presentation/rental_detail_screen.dart';
+import '../features/rentals/presentation/rental_editor_screen.dart';
+import '../features/rentals/presentation/rentals_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 
 GoRouter createAppRouter() => GoRouter(
@@ -22,7 +27,11 @@ GoRouter createAppRouter() => GoRouter(
     ),
     GoRoute(
       path: '/customers/new',
-      builder: (context, state) => const CustomerEditorScreen(),
+      builder: (context, state) => CustomerEditorScreen(
+        onSaved: state.extra is ValueChanged<Customer>
+            ? state.extra as ValueChanged<Customer>
+            : null,
+      ),
     ),
     GoRoute(
       path: '/customers/:id',
@@ -51,6 +60,19 @@ GoRouter createAppRouter() => GoRouter(
       path: '/materials/edit',
       builder: (context, state) =>
           MaterialEditorScreen(materialId: state.uri.queryParameters['id']),
+    ),
+    GoRoute(
+      path: '/rentals',
+      builder: (context, state) => const RentalsScreen(),
+    ),
+    GoRoute(
+      path: '/rentals/new',
+      builder: (context, state) => const RentalEditorScreen(),
+    ),
+    GoRoute(
+      path: '/rentals/:id',
+      builder: (context, state) =>
+          RentalDetailScreen(rentalId: state.pathParameters['id']!),
     ),
   ],
 );

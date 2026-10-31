@@ -577,6 +577,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not replace the photo.'**
   String get photoReplacementError;
+
+  /// No description provided for @rentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Rentals'**
+  String get rentals;
+
+  /// No description provided for @searchRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by customer or rental number'**
+  String get searchRentals;
+
+  /// No description provided for @returned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get returned;
+
+  /// No description provided for @partiallyReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially returned'**
+  String get partiallyReturned;
+
+  /// No description provided for @voided.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided'**
+  String get voided;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @noRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'No rentals found.'**
+  String get noRentals;
+
+  /// No description provided for @estimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate'**
+  String get estimate;
+
+  /// No description provided for @newRental.
+  ///
+  /// In en, this message translates to:
+  /// **'New rental'**
+  String get newRental;
+
+  /// No description provided for @activeRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Active rentals'**
+  String get activeRentals;
+
+  /// No description provided for @itemsCurrentlyOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Items currently out'**
+  String get itemsCurrentlyOut;
+
+  /// No description provided for @customer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get customer;
+
+  /// No description provided for @addNewCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new customer'**
+  String get addNewCustomer;
+
+  /// No description provided for @customerRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a customer.'**
+  String get customerRequired;
+
+  /// No description provided for @material.
+  ///
+  /// In en, this message translates to:
+  /// **'Material'**
+  String get material;
+
+  /// No description provided for @materialRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a material.'**
+  String get materialRequired;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @quantityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity must be at least 1.'**
+  String get quantityRequired;
+
+  /// No description provided for @addMaterialLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add material line'**
+  String get addMaterialLine;
+
+  /// No description provided for @totalPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Total per day'**
+  String get totalPerDay;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @notesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get notesOptional;
+
+  /// No description provided for @duplicateMaterialLine.
+  ///
+  /// In en, this message translates to:
+  /// **'This material is already in the rental.'**
+  String get duplicateMaterialLine;
+
+  /// No description provided for @atLeastOneLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one material line.'**
+  String get atLeastOneLine;
+
+  /// No description provided for @stockWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock warning'**
+  String get stockWarning;
+
+  /// No description provided for @requested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get requested;
+
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// No description provided for @continueAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue anyway'**
+  String get continueAnyway;
+
+  /// No description provided for @rentalDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental details'**
+  String get rentalDetails;
+
+  /// No description provided for @rentalNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental not found.'**
+  String get rentalNotFound;
+
+  /// No description provided for @rentalDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental date'**
+  String get rentalDate;
+
+  /// No description provided for @daysSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Days so far'**
+  String get daysSoFar;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @outstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get outstanding;
+
+  /// No description provided for @estimateIfReturnedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate if returned today'**
+  String get estimateIfReturnedToday;
+
+  /// No description provided for @returnComingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Return (coming next)'**
+  String get returnComingNext;
+
+  /// No description provided for @viewCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'View customer'**
+  String get viewCustomer;
 }
 
 class _AppLocalizationsDelegate

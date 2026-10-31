@@ -1241,7 +1241,7 @@ class MaterialTypesCompanion extends UpdateCompanion<MaterialRow> {
   }
 }
 
-class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
+class $RentalsTable extends Rentals with TableInfo<$RentalsTable, RentalRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1254,6 +1254,18 @@ class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rentalNumberMeta = const VerificationMeta(
+    'rentalNumber',
+  );
+  @override
+  late final GeneratedColumn<int> rentalNumber = GeneratedColumn<int>(
+    'rental_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -1365,6 +1377,7 @@ class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    rentalNumber,
     createdAt,
     updatedAt,
     customerId,
@@ -1383,7 +1396,7 @@ class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
   static const String $name = 'rentals';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Rental> instance, {
+    Insertable<RentalRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -1392,6 +1405,15 @@ class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('rental_number')) {
+      context.handle(
+        _rentalNumberMeta,
+        rentalNumber.isAcceptableOrUnknown(
+          data['rental_number']!,
+          _rentalNumberMeta,
+        ),
+      );
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -1475,12 +1497,16 @@ class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Rental map(Map<String, dynamic> data, {String? tablePrefix}) {
+  RentalRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Rental(
+    return RentalRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
+      )!,
+      rentalNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rental_number'],
       )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1531,8 +1557,9 @@ class $RentalsTable extends Rentals with TableInfo<$RentalsTable, Rental> {
   }
 }
 
-class Rental extends DataClass implements Insertable<Rental> {
+class RentalRow extends DataClass implements Insertable<RentalRow> {
   final String id;
+  final int rentalNumber;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String customerId;
@@ -1543,8 +1570,9 @@ class Rental extends DataClass implements Insertable<Rental> {
   final String? handoverPhoto;
   final DateTime? voidedAt;
   final String? voidReason;
-  const Rental({
+  const RentalRow({
     required this.id,
+    required this.rentalNumber,
     required this.createdAt,
     required this.updatedAt,
     required this.customerId,
@@ -1560,6 +1588,7 @@ class Rental extends DataClass implements Insertable<Rental> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    map['rental_number'] = Variable<int>(rentalNumber);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['customer_id'] = Variable<String>(customerId);
@@ -1586,6 +1615,7 @@ class Rental extends DataClass implements Insertable<Rental> {
   RentalsCompanion toCompanion(bool nullToAbsent) {
     return RentalsCompanion(
       id: Value(id),
+      rentalNumber: Value(rentalNumber),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       customerId: Value(customerId),
@@ -1609,13 +1639,14 @@ class Rental extends DataClass implements Insertable<Rental> {
     );
   }
 
-  factory Rental.fromJson(
+  factory RentalRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Rental(
+    return RentalRow(
       id: serializer.fromJson<String>(json['id']),
+      rentalNumber: serializer.fromJson<int>(json['rentalNumber']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       customerId: serializer.fromJson<String>(json['customerId']),
@@ -1635,6 +1666,7 @@ class Rental extends DataClass implements Insertable<Rental> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'rentalNumber': serializer.toJson<int>(rentalNumber),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'customerId': serializer.toJson<String>(customerId),
@@ -1648,8 +1680,9 @@ class Rental extends DataClass implements Insertable<Rental> {
     };
   }
 
-  Rental copyWith({
+  RentalRow copyWith({
     String? id,
+    int? rentalNumber,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? customerId,
@@ -1660,8 +1693,9 @@ class Rental extends DataClass implements Insertable<Rental> {
     Value<String?> handoverPhoto = const Value.absent(),
     Value<DateTime?> voidedAt = const Value.absent(),
     Value<String?> voidReason = const Value.absent(),
-  }) => Rental(
+  }) => RentalRow(
     id: id ?? this.id,
+    rentalNumber: rentalNumber ?? this.rentalNumber,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     customerId: customerId ?? this.customerId,
@@ -1677,9 +1711,12 @@ class Rental extends DataClass implements Insertable<Rental> {
     voidedAt: voidedAt.present ? voidedAt.value : this.voidedAt,
     voidReason: voidReason.present ? voidReason.value : this.voidReason,
   );
-  Rental copyWithCompanion(RentalsCompanion data) {
-    return Rental(
+  RentalRow copyWithCompanion(RentalsCompanion data) {
+    return RentalRow(
       id: data.id.present ? data.id.value : this.id,
+      rentalNumber: data.rentalNumber.present
+          ? data.rentalNumber.value
+          : this.rentalNumber,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       customerId: data.customerId.present
@@ -1703,8 +1740,9 @@ class Rental extends DataClass implements Insertable<Rental> {
 
   @override
   String toString() {
-    return (StringBuffer('Rental(')
+    return (StringBuffer('RentalRow(')
           ..write('id: $id, ')
+          ..write('rentalNumber: $rentalNumber, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('customerId: $customerId, ')
@@ -1722,6 +1760,7 @@ class Rental extends DataClass implements Insertable<Rental> {
   @override
   int get hashCode => Object.hash(
     id,
+    rentalNumber,
     createdAt,
     updatedAt,
     customerId,
@@ -1736,8 +1775,9 @@ class Rental extends DataClass implements Insertable<Rental> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Rental &&
+      (other is RentalRow &&
           other.id == this.id &&
+          other.rentalNumber == this.rentalNumber &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.customerId == this.customerId &&
@@ -1750,8 +1790,9 @@ class Rental extends DataClass implements Insertable<Rental> {
           other.voidReason == this.voidReason);
 }
 
-class RentalsCompanion extends UpdateCompanion<Rental> {
+class RentalsCompanion extends UpdateCompanion<RentalRow> {
   final Value<String> id;
+  final Value<int> rentalNumber;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String> customerId;
@@ -1765,6 +1806,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
   final Value<int> rowid;
   const RentalsCompanion({
     this.id = const Value.absent(),
+    this.rentalNumber = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.customerId = const Value.absent(),
@@ -1779,6 +1821,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
   });
   RentalsCompanion.insert({
     required String id,
+    this.rentalNumber = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     required String customerId,
@@ -1796,8 +1839,9 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
        customerId = Value(customerId),
        rentedAt = Value(rentedAt),
        status = Value(status);
-  static Insertable<Rental> custom({
+  static Insertable<RentalRow> custom({
     Expression<String>? id,
+    Expression<int>? rentalNumber,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? customerId,
@@ -1812,6 +1856,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (rentalNumber != null) 'rental_number': rentalNumber,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (customerId != null) 'customer_id': customerId,
@@ -1828,6 +1873,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
 
   RentalsCompanion copyWith({
     Value<String>? id,
+    Value<int>? rentalNumber,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String>? customerId,
@@ -1842,6 +1888,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
   }) {
     return RentalsCompanion(
       id: id ?? this.id,
+      rentalNumber: rentalNumber ?? this.rentalNumber,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       customerId: customerId ?? this.customerId,
@@ -1861,6 +1908,9 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (rentalNumber.present) {
+      map['rental_number'] = Variable<int>(rentalNumber.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -1902,6 +1952,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
   String toString() {
     return (StringBuffer('RentalsCompanion(')
           ..write('id: $id, ')
+          ..write('rentalNumber: $rentalNumber, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('customerId: $customerId, ')
@@ -1919,7 +1970,7 @@ class RentalsCompanion extends UpdateCompanion<Rental> {
 }
 
 class $RentalItemsTable extends RentalItems
-    with TableInfo<$RentalItemsTable, RentalItem> {
+    with TableInfo<$RentalItemsTable, RentalItemRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2039,7 +2090,7 @@ class $RentalItemsTable extends RentalItems
   static const String $name = 'rental_items';
   @override
   VerificationContext validateIntegrity(
-    Insertable<RentalItem> instance, {
+    Insertable<RentalItemRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -2131,9 +2182,9 @@ class $RentalItemsTable extends RentalItems
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  RentalItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+  RentalItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return RentalItem(
+    return RentalItemRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -2179,7 +2230,7 @@ class $RentalItemsTable extends RentalItems
   }
 }
 
-class RentalItem extends DataClass implements Insertable<RentalItem> {
+class RentalItemRow extends DataClass implements Insertable<RentalItemRow> {
   final String id;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -2189,7 +2240,7 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
   final int pricePerDaySnapshot;
   final int quantity;
   final int quantityReturned;
-  const RentalItem({
+  const RentalItemRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
@@ -2229,12 +2280,12 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
     );
   }
 
-  factory RentalItem.fromJson(
+  factory RentalItemRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return RentalItem(
+    return RentalItemRow(
       id: serializer.fromJson<String>(json['id']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -2266,7 +2317,7 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
     };
   }
 
-  RentalItem copyWith({
+  RentalItemRow copyWith({
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -2276,7 +2327,7 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
     int? pricePerDaySnapshot,
     int? quantity,
     int? quantityReturned,
-  }) => RentalItem(
+  }) => RentalItemRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2287,8 +2338,8 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
     quantity: quantity ?? this.quantity,
     quantityReturned: quantityReturned ?? this.quantityReturned,
   );
-  RentalItem copyWithCompanion(RentalItemsCompanion data) {
-    return RentalItem(
+  RentalItemRow copyWithCompanion(RentalItemsCompanion data) {
+    return RentalItemRow(
       id: data.id.present ? data.id.value : this.id,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -2311,7 +2362,7 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
 
   @override
   String toString() {
-    return (StringBuffer('RentalItem(')
+    return (StringBuffer('RentalItemRow(')
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2340,7 +2391,7 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is RentalItem &&
+      (other is RentalItemRow &&
           other.id == this.id &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -2352,7 +2403,7 @@ class RentalItem extends DataClass implements Insertable<RentalItem> {
           other.quantityReturned == this.quantityReturned);
 }
 
-class RentalItemsCompanion extends UpdateCompanion<RentalItem> {
+class RentalItemsCompanion extends UpdateCompanion<RentalItemRow> {
   final Value<String> id;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -2395,7 +2446,7 @@ class RentalItemsCompanion extends UpdateCompanion<RentalItem> {
        pricePerDaySnapshot = Value(pricePerDaySnapshot),
        quantity = Value(quantity),
        quantityReturned = Value(quantityReturned);
-  static Insertable<RentalItem> custom({
+  static Insertable<RentalItemRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -4299,6 +4350,7 @@ typedef $$MaterialTypesTableProcessedTableManager =
     >;
 typedef $$RentalsTableCreateCompanionBuilder = RentalsCompanion Function({
   required String id,
+  Value<int> rentalNumber,
   required DateTime createdAt,
   required DateTime updatedAt,
   required String customerId,
@@ -4313,6 +4365,7 @@ typedef $$RentalsTableCreateCompanionBuilder = RentalsCompanion Function({
 });
 typedef $$RentalsTableUpdateCompanionBuilder = RentalsCompanion Function({
   Value<String> id,
+  Value<int> rentalNumber,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<String> customerId,
@@ -4337,6 +4390,11 @@ class $$RentalsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rentalNumber => $composableBuilder(
+    column: $table.rentalNumber,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4405,6 +4463,11 @@ class $$RentalsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get rentalNumber => $composableBuilder(
+    column: $table.rentalNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4468,6 +4531,11 @@ class $$RentalsTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<int> get rentalNumber => $composableBuilder(
+    column: $table.rentalNumber,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -4512,14 +4580,14 @@ class $$RentalsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $RentalsTable,
-          Rental,
+          RentalRow,
           $$RentalsTableFilterComposer,
           $$RentalsTableOrderingComposer,
           $$RentalsTableAnnotationComposer,
           $$RentalsTableCreateCompanionBuilder,
           $$RentalsTableUpdateCompanionBuilder,
-          (Rental, BaseReferences<_$AppDatabase, $RentalsTable, Rental>),
-          Rental,
+          (RentalRow, BaseReferences<_$AppDatabase, $RentalsTable, RentalRow>),
+          RentalRow,
           PrefetchHooks Function()
         > {
   $$RentalsTableTableManager(_$AppDatabase db, $RentalsTable table)
@@ -4536,6 +4604,7 @@ class $$RentalsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<int> rentalNumber = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String> customerId = const Value.absent(),
@@ -4549,6 +4618,7 @@ class $$RentalsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => RentalsCompanion(
                 id: id,
+                rentalNumber: rentalNumber,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 customerId: customerId,
@@ -4564,6 +4634,7 @@ class $$RentalsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<int> rentalNumber = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 required String customerId,
@@ -4577,6 +4648,7 @@ class $$RentalsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => RentalsCompanion.insert(
                 id: id,
+                rentalNumber: rentalNumber,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 customerId: customerId,
@@ -4601,14 +4673,14 @@ typedef $$RentalsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $RentalsTable,
-      Rental,
+      RentalRow,
       $$RentalsTableFilterComposer,
       $$RentalsTableOrderingComposer,
       $$RentalsTableAnnotationComposer,
       $$RentalsTableCreateCompanionBuilder,
       $$RentalsTableUpdateCompanionBuilder,
-      (Rental, BaseReferences<_$AppDatabase, $RentalsTable, Rental>),
-      Rental,
+      (RentalRow, BaseReferences<_$AppDatabase, $RentalsTable, RentalRow>),
+      RentalRow,
       PrefetchHooks Function()
     >;
 typedef $$RentalItemsTableCreateCompanionBuilder =
@@ -4798,17 +4870,17 @@ class $$RentalItemsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $RentalItemsTable,
-          RentalItem,
+          RentalItemRow,
           $$RentalItemsTableFilterComposer,
           $$RentalItemsTableOrderingComposer,
           $$RentalItemsTableAnnotationComposer,
           $$RentalItemsTableCreateCompanionBuilder,
           $$RentalItemsTableUpdateCompanionBuilder,
           (
-            RentalItem,
-            BaseReferences<_$AppDatabase, $RentalItemsTable, RentalItem>,
+            RentalItemRow,
+            BaseReferences<_$AppDatabase, $RentalItemsTable, RentalItemRow>,
           ),
-          RentalItem,
+          RentalItemRow,
           PrefetchHooks Function()
         > {
   $$RentalItemsTableTableManager(_$AppDatabase db, $RentalItemsTable table)
@@ -4882,17 +4954,17 @@ typedef $$RentalItemsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $RentalItemsTable,
-      RentalItem,
+      RentalItemRow,
       $$RentalItemsTableFilterComposer,
       $$RentalItemsTableOrderingComposer,
       $$RentalItemsTableAnnotationComposer,
       $$RentalItemsTableCreateCompanionBuilder,
       $$RentalItemsTableUpdateCompanionBuilder,
       (
-        RentalItem,
-        BaseReferences<_$AppDatabase, $RentalItemsTable, RentalItem>,
+        RentalItemRow,
+        BaseReferences<_$AppDatabase, $RentalItemsTable, RentalItemRow>,
       ),
-      RentalItem,
+      RentalItemRow,
       PrefetchHooks Function()
     >;
 typedef $$ReturnEventsTableCreateCompanionBuilder =

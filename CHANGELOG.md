@@ -17,3 +17,7 @@
 - Added Phase 1 customer registration, private National ID photo storage/capture, duplicate warnings, profiles, archive/reactivate, and audit logging.
 - Customer widget tests now use stable control keys, a tall viewport, and explicit visibility before taps.
 - Added stack-safe navigation and independent, audited customer ID-photo replacement while preserving old photo files.
+## Unreleased
+
+- Added Phase 1 Slice C rental creation, rental list/details, rental numbering, stock warnings, and calendar-day billing.
+- Fixed Slice C audit Value typing, stock-override exception coverage, billing estimate arithmetic, and editor form lints.

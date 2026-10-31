@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:t2_rental/features/customers/application/customer_providers.dart';
+import 'package:t2_rental/features/rentals/application/rental_providers.dart';
 import 'package:t2_rental/features/customers/domain/customer.dart';
 import 'package:t2_rental/features/customers/presentation/customer_detail_screen.dart';
 import 'package:t2_rental/l10n/generated/app_localizations.dart';
 
 import '../../helpers/fake_customer_repository.dart';
 import '../../helpers/fake_image_services.dart';
+import '../../helpers/fake_rental_repository.dart';
 import '../../helpers/widget_test_helpers.dart';
 
 Customer _customer() {
@@ -36,6 +38,7 @@ Widget _buildProfile(
   return ProviderScope(
     overrides: [
       customerRepositoryProvider.overrideWithValue(repository),
+      rentalRepositoryProvider.overrideWithValue(FakeRentalRepository()),
       imageCaptureServiceProvider.overrideWithValue(capture),
       imageStorageServiceProvider.overrideWithValue(storage),
     ],

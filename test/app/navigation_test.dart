@@ -12,10 +12,12 @@ import 'package:t2_rental/features/materials/presentation/material_editor_screen
 import 'package:t2_rental/features/materials/presentation/materials_screen.dart';
 import 'package:t2_rental/features/settings/presentation/settings_screen.dart';
 import 'package:t2_rental/features/home/presentation/home_screen.dart';
+import 'package:t2_rental/features/rentals/application/rental_providers.dart';
 import 'package:t2_rental/l10n/generated/app_localizations.dart';
 
 import '../helpers/fake_customer_repository.dart';
 import '../helpers/fake_material_repository.dart';
+import '../helpers/fake_rental_repository.dart';
 import '../helpers/widget_test_helpers.dart';
 
 Widget _buildApp() {
@@ -23,6 +25,7 @@ Widget _buildApp() {
     overrides: [
       customerRepositoryProvider.overrideWithValue(FakeCustomerRepository()),
       materialRepositoryProvider.overrideWithValue(FakeMaterialRepository()),
+      rentalRepositoryProvider.overrideWithValue(FakeRentalRepository()),
     ],
     child: MaterialApp.router(
       locale: const Locale('en'),

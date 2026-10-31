@@ -14,9 +14,10 @@ import '../domain/customer_validation.dart';
 enum _DuplicateChoice { continueSaving, openExisting }
 
 class CustomerEditorScreen extends ConsumerStatefulWidget {
-  const CustomerEditorScreen({super.key, this.customerId});
+  const CustomerEditorScreen({super.key, this.customerId, this.onSaved});
 
   final String? customerId;
+  final ValueChanged<Customer>? onSaved;
 
   @override
   ConsumerState<CustomerEditorScreen> createState() =>
@@ -233,7 +234,12 @@ class _CustomerEditorScreenState extends ConsumerState<CustomerEditorScreen> {
             );
       _newlySavedPaths.clear();
       if (mounted) {
-        context.pushReplacement('/customers/${customer.id}');
+        if (widget.onSaved != null) {
+          widget.onSaved!(customer);
+          context.pop(customer);
+        } else {
+          context.pushReplacement('/customers/${customer.id}');
+        }
       }
     } catch (error) {
       await _deleteNewOrphans();

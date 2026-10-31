@@ -252,4 +252,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoReplacementError => 'Could not replace the photo.';
+
+  @override
+  String get rentals => 'Rentals';
+
+  @override
+  String get searchRentals => 'Search by customer or rental number';
+
+  @override
+  String get returned => 'Returned';
+
+  @override
+  String get partiallyReturned => 'Partially returned';
+
+  @override
+  String get voided => 'Voided';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get noRentals => 'No rentals found.';
+
+  @override
+  String get estimate => 'Estimate';
+
+  @override
+  String get newRental => 'New rental';
+
+  @override
+  String get activeRentals => 'Active rentals';
+
+  @override
+  String get itemsCurrentlyOut => 'Items currently out';
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get addNewCustomer => 'Add new customer';
+
+  @override
+  String get customerRequired => 'Select a customer.';
+
+  @override
+  String get material => 'Material';
+
+  @override
+  String get materialRequired => 'Select a material.';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get quantityRequired => 'Quantity must be at least 1.';
+
+  @override
+  String get addMaterialLine => 'Add material line';
+
+  @override
+  String get totalPerDay => 'Total per day';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get duplicateMaterialLine => 'This material is already in the rental.';
+
+  @override
+  String get atLeastOneLine => 'Add at least one material line.';
+
+  @override
+  String get stockWarning => 'Stock warning';
+
+  @override
+  String get requested => 'Requested';
+
+  @override
+  String get available => 'Available';
+
+  @override
+  String get continueAnyway => 'Continue anyway';
+
+  @override
+  String get rentalDetails => 'Rental details';
+
+  @override
+  String get rentalNotFound => 'Rental not found.';
+
+  @override
+  String get rentalDate => 'Rental date';
+
+  @override
+  String get daysSoFar => 'Days so far';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get outstanding => 'Outstanding';
+
+  @override
+  String get estimateIfReturnedToday => 'Estimate if returned today';
+
+  @override
+  String get returnComingNext => 'Return (coming next)';
+
+  @override
+  String get viewCustomer => 'View customer';
 }

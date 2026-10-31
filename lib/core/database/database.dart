@@ -38,8 +38,10 @@ class MaterialTypes extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('RentalRow')
 class Rentals extends Table {
   TextColumn get id => text()();
+  IntColumn get rentalNumber => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   TextColumn get customerId => text()();
@@ -55,6 +57,7 @@ class Rentals extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('RentalItemRow')
 class RentalItems extends Table {
   TextColumn get id => text()();
   DateTimeColumn get createdAt => dateTime()();
@@ -118,11 +121,22 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
-    onUpgrade: (m, from, to) async {},
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(rentals, rentals.rentalNumber);
+        final existing = await select(rentals).get();
+        existing.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        for (var index = 0; index < existing.length; index++) {
+          await (update(rentals)
+                ..where((table) => table.id.equals(existing[index].id)))
+              .write(RentalsCompanion(rentalNumber: Value(index + 1)));
+        }
+      }
+    },
   );
 }

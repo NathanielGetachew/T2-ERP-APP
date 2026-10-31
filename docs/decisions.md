@@ -19,3 +19,5 @@
 - Customers derive `isActive` from the existing `voidedAt` column, so the Customer schema remains unchanged; ID photos use relative paths in the private documents directory and are never deleted.
 - Customer photo replacements write a separate audit entry containing the old and new file paths.
 - Navigation uses push for stacked feature screens; customer photo replacement keeps old files and audits every replacement. image_picker uses the system camera app, so no CAMERA permission is declared.
+- Phase 1 Slice C locks the rental timestamp at save time, snapshots catalog prices on rental lines, and assigns sequential human-readable rental numbers through schema migration 2.
+- Stock override confirmations are recorded in the rental audit payload. Billing uses an injected local offset and inclusive calendar-day counting.

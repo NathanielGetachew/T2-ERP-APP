@@ -112,7 +112,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get editCustomer => 'ደንበኛን ያርትዑ';
 
   @override
-  String get searchCustomers => 'ደንበኞችን ይፈልጉ';
+  String get searchCustomers => 'ደንበኞችን ፈልግ';
 
   @override
   String get showArchived => 'የታሹትን አሳይ';
@@ -248,4 +248,115 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get photoReplacementError => 'ፎቶውን መተካት አልተቻለም።';
+
+  @override
+  String get rentals => 'ኪራዮች';
+
+  @override
+  String get searchRentals => 'በደንበኛ ወይም በኪራይ ቁጥር ፈልግ';
+
+  @override
+  String get returned => 'የተመለሰ';
+
+  @override
+  String get partiallyReturned => 'በከፊል የተመለሰ';
+
+  @override
+  String get voided => 'የተሰረዘ';
+
+  @override
+  String get all => 'ሁሉም';
+
+  @override
+  String get noRentals => 'ምንም ኪራይ አልተገኘም።';
+
+  @override
+  String get estimate => 'ግምት';
+
+  @override
+  String get newRental => 'አዲስ ኪራይ';
+
+  @override
+  String get activeRentals => 'ንቁ ኪራዮች';
+
+  @override
+  String get itemsCurrentlyOut => 'አሁን ውጭ ያሉ ዕቃዎች';
+
+  @override
+  String get customer => 'ደንበኛ';
+
+  @override
+  String get addNewCustomer => 'አዲስ ደንበኛ ጨምር';
+
+  @override
+  String get customerRequired => 'ደንበኛ ይምረጡ።';
+
+  @override
+  String get material => 'ዕቃ';
+
+  @override
+  String get materialRequired => 'ዕቃ ይምረጡ።';
+
+  @override
+  String get quantity => 'ብዛት';
+
+  @override
+  String get quantityRequired => 'ብዛት ቢያንስ 1 መሆን አለበት።';
+
+  @override
+  String get addMaterialLine => 'የዕቃ መስመር ጨምር';
+
+  @override
+  String get totalPerDay => 'የቀን ጠቅላላ';
+
+  @override
+  String get remove => 'አስወግድ';
+
+  @override
+  String get notesOptional => 'ማስታወሻ (አማራጭ)';
+
+  @override
+  String get duplicateMaterialLine => 'ይህ ዕቃ በኪራዩ ውስጥ አለ።';
+
+  @override
+  String get atLeastOneLine => 'ቢያንስ አንድ የዕቃ መስመር ይጨምሩ።';
+
+  @override
+  String get stockWarning => 'የእቃ ክምችት ማስጠንቀቂያ';
+
+  @override
+  String get requested => 'የተጠየቀ';
+
+  @override
+  String get available => 'የሚገኝ';
+
+  @override
+  String get continueAnyway => 'ለማንኛውም ቀጥል';
+
+  @override
+  String get rentalDetails => 'የኪራይ ዝርዝር';
+
+  @override
+  String get rentalNotFound => 'ኪራዩ አልተገኘም።';
+
+  @override
+  String get rentalDate => 'የኪራይ ቀን';
+
+  @override
+  String get daysSoFar => 'እስካሁን ያሉ ቀናት';
+
+  @override
+  String get status => 'ሁኔታ';
+
+  @override
+  String get outstanding => 'ያልተመለሰ';
+
+  @override
+  String get estimateIfReturnedToday => 'ዛሬ ቢመለስ ግምት';
+
+  @override
+  String get returnComingNext => 'መመለስ (በቀጣይ)';
+
+  @override
+  String get viewCustomer => 'ደንበኛን ይመልከቱ';
 }

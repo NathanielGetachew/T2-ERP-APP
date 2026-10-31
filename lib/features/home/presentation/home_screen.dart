@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../rentals/application/rental_providers.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final activeRentals = ref.watch(activeRentalsProvider);
+    final activeCount = activeRentals.valueOrNull?.length ?? 0;
+    final itemsOut =
+        activeRentals.valueOrNull?.fold<int>(
+          0,
+          (sum, rental) =>
+              sum +
+              rental.lines.fold<int>(
+                0,
+                (lineSum, line) => lineSum + line.outstandingQuantity,
+              ),
+        ) ??
+        0;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.appTitle)),
       body: Center(
@@ -24,6 +39,21 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Text(l10n.phase0Message, textAlign: TextAlign.center),
               const SizedBox(height: 32),
+              FilledButton.icon(
+                key: const ValueKey('home_new_rental_button'),
+                onPressed: () => context.push('/rentals'),
+                icon: const Icon(Icons.add_business_outlined),
+                label: Text(l10n.newRental),
+              ),
+              const SizedBox(height: 12),
+              Text('${l10n.activeRentals}: $activeCount'),
+              Text('${l10n.itemsCurrentlyOut}: $itemsOut'),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => context.push('/rentals'),
+                child: Text(l10n.rentals),
+              ),
+              const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: () => context.push('/customers'),
                 icon: const Icon(Icons.people_outline),
