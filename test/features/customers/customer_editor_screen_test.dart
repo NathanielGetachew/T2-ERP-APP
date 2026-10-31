@@ -110,13 +110,15 @@ void main() {
 
   testWidgets('duplicate warning allows continuing', (tester) async {
     _setTallViewport(tester);
-    final repository = FakeCustomerRepository([
-      await FakeCustomerRepository().create(
-        fullName: 'Abebe Kebede',
-        address: 'Addis Ababa',
-        idPhotoFrontPath: 'existing.jpg',
-      ),
-    ]);
+    final repository = FakeCustomerRepository(
+      initial: [
+        await FakeCustomerRepository().create(
+          fullName: 'Abebe Kebede',
+          address: 'Addis Ababa',
+          idPhotoFrontPath: 'existing.jpg',
+        ),
+      ],
+    );
     final storage = FakeImageStorageService();
     await tester.pumpWidget(
       _buildEditor(repository, FakeImageCaptureService(), storage),

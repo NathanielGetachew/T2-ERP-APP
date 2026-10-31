@@ -5,7 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:t2_rental/app/router.dart';
 import 'package:t2_rental/features/customers/application/customer_providers.dart';
+import 'package:t2_rental/features/customers/presentation/customer_editor_screen.dart';
+import 'package:t2_rental/features/customers/presentation/customers_screen.dart';
 import 'package:t2_rental/features/materials/application/material_providers.dart';
+import 'package:t2_rental/features/materials/presentation/material_editor_screen.dart';
+import 'package:t2_rental/features/materials/presentation/materials_screen.dart';
+import 'package:t2_rental/features/settings/presentation/settings_screen.dart';
+import 'package:t2_rental/features/home/presentation/home_screen.dart';
 import 'package:t2_rental/l10n/generated/app_localizations.dart';
 
 import '../helpers/fake_customer_repository.dart';
@@ -37,8 +43,12 @@ Future<void> _pumpRoute(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 300));
 }
 
-Future<void> _tapBack(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.arrow_back).first);
+Future<void> _tapBack(WidgetTester tester, Finder screen) async {
+  final backButton = find.descendant(
+    of: screen,
+    matching: find.byIcon(Icons.arrow_back),
+  );
+  await tester.tap(backButton);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 300));
 }
@@ -49,15 +59,21 @@ void main() {
     await _pumpRoute(tester);
     await tester.tap(find.text('Customers'));
     await _pumpRoute(tester);
-    expect(find.text('Customers'), findsOneWidget);
+    expect(find.byType(CustomersScreen), findsOneWidget);
 
     await tester.tap(find.text('Add customer'));
     await _pumpRoute(tester);
-    expect(find.text('Add customer'), findsOneWidget);
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.byType(CustomerEditorScreen), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(CustomerEditorScreen),
+        matching: find.byIcon(Icons.arrow_back),
+      ),
+      findsOneWidget,
+    );
 
-    await _tapBack(tester);
-    expect(find.text('Customers'), findsOneWidget);
+    await _tapBack(tester, find.byType(CustomerEditorScreen));
+    expect(find.byType(CustomersScreen), findsOneWidget);
     await disposeWidgetTree(tester);
   });
 
@@ -69,10 +85,16 @@ void main() {
     await tester.tap(find.text('Add material'));
     await _pumpRoute(tester);
 
-    expect(find.text('Add material'), findsOneWidget);
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
-    await _tapBack(tester);
-    expect(find.text('Materials'), findsOneWidget);
+    expect(find.byType(MaterialEditorScreen), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(MaterialEditorScreen),
+        matching: find.byIcon(Icons.arrow_back),
+      ),
+      findsOneWidget,
+    );
+    await _tapBack(tester, find.byType(MaterialEditorScreen));
+    expect(find.byType(MaterialsScreen), findsOneWidget);
     await disposeWidgetTree(tester);
   });
 
@@ -81,10 +103,10 @@ void main() {
     await _pumpRoute(tester);
     await tester.tap(find.text('Settings'));
     await _pumpRoute(tester);
-    expect(find.text('Settings'), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
 
-    await _tapBack(tester);
-    expect(find.text('Home'), findsOneWidget);
+    await _tapBack(tester, find.byType(SettingsScreen));
+    expect(find.byType(HomeScreen), findsOneWidget);
     await disposeWidgetTree(tester);
   });
 }

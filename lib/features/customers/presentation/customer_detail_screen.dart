@@ -83,12 +83,13 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           key: const ValueKey('customer_retake_front_photo_button'),
-          onPressed: () => _replacePhoto(CustomerPhotoSide.front),
+          onPressed: () => _replacePhoto(customer, CustomerPhotoSide.front),
           icon: const Icon(Icons.camera_alt_outlined),
           label: Text(l10n.retakeFrontPhoto),
         ),
         OutlinedButton.icon(
           onPressed: () => _replacePhoto(
+            customer,
             CustomerPhotoSide.front,
             source: ImageSource.gallery,
           ),
@@ -111,7 +112,7 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
         const SizedBox(height: 8),
         _ProfilePhoto(path: customer.idPhotoBackPath, storage: storage),
         OutlinedButton.icon(
-          onPressed: () => _replacePhoto(CustomerPhotoSide.back),
+          onPressed: () => _replacePhoto(customer, CustomerPhotoSide.back),
           icon: const Icon(Icons.camera_alt_outlined),
           label: Text(
             customer.idPhotoBackPath == null
@@ -121,6 +122,7 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
         ),
         OutlinedButton.icon(
           onPressed: () => _replacePhoto(
+            customer,
             CustomerPhotoSide.back,
             source: ImageSource.gallery,
           ),
@@ -141,7 +143,7 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
         Text(l10n.noRentalHistory),
         const SizedBox(height: 24),
         FilledButton.tonal(
-          onPressed: () => _toggleActive(context),
+          onPressed: () => _toggleActive(customer),
           child: Text(
             customer.isActive ? l10n.archiveCustomer : l10n.reactivateCustomer,
           ),
@@ -150,15 +152,18 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
     );
   }
 
-  Future<void> _toggleActive(BuildContext context) async {
+  Future<void> _toggleActive(Customer customer) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       await ref
           .read(customerRepositoryProvider)
           .setActive(customer.id, !customer.isActive);
+      if (!mounted) {
+        return;
+      }
       ref.invalidate(customerDetailProvider(customer.id));
     } catch (_) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(l10n.saveCustomerError)));
       }
@@ -166,6 +171,7 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
   }
 
   Future<void> _replacePhoto(
+    Customer customer,
     CustomerPhotoSide side, {
     ImageSource source = ImageSource.camera,
   }) async {
@@ -202,6 +208,10 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
       }
       final storage = ref.read(imageStorageServiceProvider);
       final path = await storage.saveCustomerImage(image);
+      if (!mounted) {
+        await storage.deleteOrphan(path);
+        return;
+      }
       try {
         await ref
             .read(customerRepositoryProvider)
@@ -209,6 +219,9 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
       } catch (_) {
         await storage.deleteOrphan(path);
         rethrow;
+      }
+      if (!mounted) {
+        return;
       }
       ref.invalidate(customerDetailProvider(customer.id));
       if (mounted) {

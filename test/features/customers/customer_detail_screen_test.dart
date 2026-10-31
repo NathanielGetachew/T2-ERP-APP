@@ -55,7 +55,7 @@ Widget _buildProfile(
 
 void main() {
   testWidgets('profile retake replaces the front photo', (tester) async {
-    final repository = FakeCustomerRepository([_customer()]);
+    final repository = FakeCustomerRepository(initial: [_customer()]);
     final storage = FakeImageStorageService();
     await tester.pumpWidget(
       _buildProfile(repository, FakeImageCaptureService(), storage),
@@ -67,7 +67,7 @@ void main() {
       find.byKey(const ValueKey('customer_retake_front_photo_button')),
     );
     await tester.pump();
-    await tester.tap(find.text('Continue saving'));
+    await tester.tap(find.text('Replace photo'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -83,9 +83,10 @@ void main() {
   testWidgets('failed profile replacement deletes the new orphan', (
     tester,
   ) async {
-    final repository = FakeCustomerRepository([
-      _customer(),
-    ], failPhotoReplacement: true);
+    final repository = FakeCustomerRepository(
+      initial: [_customer()],
+      failPhotoReplacement: true,
+    );
     final storage = FakeImageStorageService();
     await tester.pumpWidget(
       _buildProfile(repository, FakeImageCaptureService(), storage),
@@ -97,7 +98,7 @@ void main() {
       find.byKey(const ValueKey('customer_retake_front_photo_button')),
     );
     await tester.pump();
-    await tester.tap(find.text('Continue saving'));
+    await tester.tap(find.text('Replace photo'));
     await tester.pump();
 
     expect(storage.deletedPaths, ['customer_ids/fake-1.jpg']);

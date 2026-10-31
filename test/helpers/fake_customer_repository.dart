@@ -3,8 +3,8 @@ import 'package:t2_rental/features/customers/domain/customer_repository.dart';
 import 'package:t2_rental/features/customers/domain/customer_validation.dart';
 
 class FakeCustomerRepository implements CustomerRepository {
-  FakeCustomerRepository(
-    [Iterable<Customer> initial = const []], {
+  FakeCustomerRepository({
+    Iterable<Customer> initial = const [],
     this.failPhotoReplacement = false,
   }) : _customers = initial.toList();
 
