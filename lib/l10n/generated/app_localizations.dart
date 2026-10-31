@@ -283,6 +283,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save material.'**
   String get saveMaterialError;
+
+  /// No description provided for @customers.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get customers;
+
+  /// No description provided for @addCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add customer'**
+  String get addCustomer;
+
+  /// No description provided for @editCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit customer'**
+  String get editCustomer;
+
+  /// No description provided for @searchCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search customers'**
+  String get searchCustomers;
+
+  /// No description provided for @showArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Show archived'**
+  String get showArchived;
+
+  /// No description provided for @noCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers found.'**
+  String get noCustomers;
+
+  /// No description provided for @customersLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load customers.'**
+  String get customersLoadError;
+
+  /// No description provided for @archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get archived;
+
+  /// No description provided for @customerProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer profile'**
+  String get customerProfile;
+
+  /// No description provided for @customerNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer not found.'**
+  String get customerNotFound;
+
+  /// No description provided for @rentalHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental history'**
+  String get rentalHistory;
+
+  /// No description provided for @noRentalHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No rental history yet.'**
+  String get noRentalHistory;
+
+  /// No description provided for @archiveCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive customer'**
+  String get archiveCustomer;
+
+  /// No description provided for @reactivateCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate customer'**
+  String get reactivateCustomer;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get fullName;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @addressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Address is required.'**
+  String get addressRequired;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// No description provided for @notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notes;
+
+  /// No description provided for @idPhotoFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Front ID photo'**
+  String get idPhotoFront;
+
+  /// No description provided for @idPhotoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back ID photo'**
+  String get idPhotoBack;
+
+  /// No description provided for @photoPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored privately on this device.'**
+  String get photoPrivacyNote;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @retakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get retakePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @photoSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the photo.'**
+  String get photoSaveError;
+
+  /// No description provided for @photoCaptureError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not capture the photo.'**
+  String get photoCaptureError;
+
+  /// No description provided for @cameraPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission was denied.'**
+  String get cameraPermissionDenied;
+
+  /// No description provided for @frontPhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A front ID photo is required.'**
+  String get frontPhotoRequired;
+
+  /// No description provided for @possibleDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible duplicate'**
+  String get possibleDuplicate;
+
+  /// No description provided for @existingCustomersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing possible matches were found.'**
+  String get existingCustomersFound;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @openExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Open existing'**
+  String get openExisting;
+
+  /// No description provided for @continueSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue saving'**
+  String get continueSaving;
+
+  /// No description provided for @saveCustomerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save customer.'**
+  String get saveCustomerError;
+
+  /// No description provided for @phoneLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone must contain 7 to 15 digits.'**
+  String get phoneLengthError;
+
+  /// No description provided for @phoneCharactersError.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone may contain only digits, spaces, +, and -.'**
+  String get phoneCharactersError;
 }
 
 class _AppLocalizationsDelegate

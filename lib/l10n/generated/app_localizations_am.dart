@@ -101,4 +101,115 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get saveMaterialError => 'ቁሳቁሱን ማስቀመጥ አልተቻለም።';
+
+  @override
+  String get customers => 'ደንበኞች';
+
+  @override
+  String get addCustomer => 'ደንበኛ ይጨምሩ';
+
+  @override
+  String get editCustomer => 'ደንበኛን ያርትዑ';
+
+  @override
+  String get searchCustomers => 'ደንበኞችን ይፈልጉ';
+
+  @override
+  String get showArchived => 'የታሹትን አሳይ';
+
+  @override
+  String get noCustomers => 'ምንም ደንበኛ አልተገኘም።';
+
+  @override
+  String get customersLoadError => 'ደንበኞችን መጫን አልተቻለም።';
+
+  @override
+  String get archived => 'ታሽቷል';
+
+  @override
+  String get customerProfile => 'የደንበኛ መገለጫ';
+
+  @override
+  String get customerNotFound => 'ደንበኛው አልተገኘም።';
+
+  @override
+  String get rentalHistory => 'የኪራይ ታሪክ';
+
+  @override
+  String get noRentalHistory => 'እስካሁን የኪራይ ታሪክ የለም።';
+
+  @override
+  String get archiveCustomer => 'ደንበኛን ያስቀምጡ';
+
+  @override
+  String get reactivateCustomer => 'ደንበኛን እንደገና አንቃ';
+
+  @override
+  String get fullName => 'ሙሉ ስም';
+
+  @override
+  String get address => 'አድራሻ';
+
+  @override
+  String get addressRequired => 'አድራሻ ያስፈልጋል።';
+
+  @override
+  String get phone => 'ስልክ';
+
+  @override
+  String get notes => 'ማስታወሻ';
+
+  @override
+  String get idPhotoFront => 'የመታወቂያ ፊት ፎቶ';
+
+  @override
+  String get idPhotoBack => 'የመታወቂያ ጀርባ ፎቶ';
+
+  @override
+  String get photoPrivacyNote => 'በዚህ መሣሪያ ውስጥ በግል ይቀመጣል።';
+
+  @override
+  String get takePhoto => 'ፎቶ ያንሱ';
+
+  @override
+  String get retakePhoto => 'እንደገና ያንሱ';
+
+  @override
+  String get chooseFromGallery => 'ከጋለሪ ይምረጡ';
+
+  @override
+  String get photoSaveError => 'ፎቶውን ማስቀመጥ አልተቻለም።';
+
+  @override
+  String get photoCaptureError => 'ፎቶ ማንሳት አልተቻለም።';
+
+  @override
+  String get cameraPermissionDenied => 'የካሜራ ፈቃድ ተከልክሏል።';
+
+  @override
+  String get frontPhotoRequired => 'የመታወቂያ ፊት ፎቶ ያስፈልጋል።';
+
+  @override
+  String get possibleDuplicate => 'ሊደገም የሚችል ደንበኛ';
+
+  @override
+  String get existingCustomersFound => 'ሊመሳሰሉ የሚችሉ ደንበኞች ተገኝተዋል።';
+
+  @override
+  String get cancel => 'ሰርዝ';
+
+  @override
+  String get openExisting => 'ያለውን ክፈት';
+
+  @override
+  String get continueSaving => 'ማስቀመጥ ቀጥል';
+
+  @override
+  String get saveCustomerError => 'ደንበኛውን ማስቀመጥ አልተቻለም።';
+
+  @override
+  String get phoneLengthError => 'ስልክ ከ7 እስከ 15 አሃዞች ሊኖሩት ይገባል።';
+
+  @override
+  String get phoneCharactersError => 'ስልክ አሃዞች፣ ክፍተት፣ + እና - ብቻ ሊይዝ ይችላል።';
 }

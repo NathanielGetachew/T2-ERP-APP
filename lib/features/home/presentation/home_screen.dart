@@ -25,6 +25,12 @@ class HomeScreen extends StatelessWidget {
               Text(l10n.phase0Message, textAlign: TextAlign.center),
               const SizedBox(height: 32),
               FilledButton.icon(
+                onPressed: () => context.go('/customers'),
+                icon: const Icon(Icons.people_outline),
+                label: Text(l10n.customers),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
                 onPressed: () => context.go('/materials'),
                 icon: const Icon(Icons.inventory_2_outlined),
                 label: Text(l10n.materials),

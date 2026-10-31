@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 
 part 'database.g.dart';
 
+@DataClassName('CustomerRow')
 class Customers extends Table {
   TextColumn get id => text()();
   DateTimeColumn get createdAt => dateTime()();

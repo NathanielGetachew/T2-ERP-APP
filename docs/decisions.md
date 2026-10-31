@@ -16,3 +16,5 @@
 - The catalog form uses string/integer parsing for ETB minor units and does not use floating-point money values.
 - The domain catalog entity is named `RentalMaterial`, and the Drift row is named `MaterialRow`, to avoid clashes with Flutter's `MaterialType` enum.
 - Widget tests use fake repositories; real Drift only in plain unit tests (FakeAsync incompatibility).
+- Customers derive `isActive` from the existing `voidedAt` column, so the Customer schema remains unchanged; ID photos use relative paths in the private documents directory and are never deleted.
+- Customer photo replacements write a separate audit entry containing the old and new file paths.

@@ -103,4 +103,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveMaterialError => 'Could not save material.';
+
+  @override
+  String get customers => 'Customers';
+
+  @override
+  String get addCustomer => 'Add customer';
+
+  @override
+  String get editCustomer => 'Edit customer';
+
+  @override
+  String get searchCustomers => 'Search customers';
+
+  @override
+  String get showArchived => 'Show archived';
+
+  @override
+  String get noCustomers => 'No customers found.';
+
+  @override
+  String get customersLoadError => 'Could not load customers.';
+
+  @override
+  String get archived => 'Archived';
+
+  @override
+  String get customerProfile => 'Customer profile';
+
+  @override
+  String get customerNotFound => 'Customer not found.';
+
+  @override
+  String get rentalHistory => 'Rental history';
+
+  @override
+  String get noRentalHistory => 'No rental history yet.';
+
+  @override
+  String get archiveCustomer => 'Archive customer';
+
+  @override
+  String get reactivateCustomer => 'Reactivate customer';
+
+  @override
+  String get fullName => 'Full name';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get addressRequired => 'Address is required.';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get idPhotoFront => 'Front ID photo';
+
+  @override
+  String get idPhotoBack => 'Back ID photo';
+
+  @override
+  String get photoPrivacyNote => 'Stored privately on this device.';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get retakePhoto => 'Retake';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get photoSaveError => 'Could not save the photo.';
+
+  @override
+  String get photoCaptureError => 'Could not capture the photo.';
+
+  @override
+  String get cameraPermissionDenied => 'Camera permission was denied.';
+
+  @override
+  String get frontPhotoRequired => 'A front ID photo is required.';
+
+  @override
+  String get possibleDuplicate => 'Possible duplicate';
+
+  @override
+  String get existingCustomersFound => 'Existing possible matches were found.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get openExisting => 'Open existing';
+
+  @override
+  String get continueSaving => 'Continue saving';
+
+  @override
+  String get saveCustomerError => 'Could not save customer.';
+
+  @override
+  String get phoneLengthError => 'Phone must contain 7 to 15 digits.';
+
+  @override
+  String get phoneCharactersError =>
+      'Phone may contain only digits, spaces, +, and -.';
 }
