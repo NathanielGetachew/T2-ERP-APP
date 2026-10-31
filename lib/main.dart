@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'app/app.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: T2RentalApp()));
 }
 
+/*
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -34,7 +38,9 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+*/
 
+/*
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
@@ -120,3 +126,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+*/

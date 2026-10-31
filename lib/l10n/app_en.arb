@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "appTitle": "T2 Rental",
+  "home": "Home",
+  "settings": "Settings",
+  "language": "Language",
+  "english": "English",
+  "amharic": "Amharic",
+  "phase0Message": "Foundation setup is ready.",
+  "chooseLanguage": "Choose language"
+}

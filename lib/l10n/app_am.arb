@@ -1,0 +1,11 @@
+{
+  "@@locale": "am",
+  "appTitle": "T2 Rental",
+  "home": "መነሻ",
+  "settings": "ቅንብሮች",
+  "language": "ቋንቋ",
+  "english": "እንግሊዝኛ",
+  "amharic": "አማርኛ",
+  "phase0Message": "የመሠረት ዝግጅቱ ተጠናቋል።",
+  "chooseLanguage": "ቋንቋ ይምረጡ"
+}
