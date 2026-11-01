@@ -70,7 +70,11 @@ GoRouter createAppRouter() => GoRouter(
     ),
     GoRoute(
       path: '/rentals/new',
-      builder: (context, state) => const RentalEditorScreen(),
+      builder: (context, state) => RentalEditorScreen(
+        recreateFrom: state.extra is RentalDetails
+            ? state.extra as RentalDetails
+            : null,
+      ),
     ),
     GoRoute(
       path: '/rentals/:id',

@@ -36,53 +36,53 @@ class HomeScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                l10n.home,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 16),
-              Text(l10n.phase0Message, textAlign: TextAlign.center),
-              const SizedBox(height: 32),
-              FilledButton.icon(
-                key: const ValueKey('home_new_rental_button'),
-                onPressed: () => context.push('/rentals'),
-                icon: const Icon(Icons.add_business_outlined),
-                label: Text(l10n.newRental),
-              ),
-              const SizedBox(height: 12),
-              Text('${l10n.activeRentals}: $activeCount'),
-              Text('${l10n.itemsCurrentlyOut}: $itemsOut'),
-              Text(
-                '${l10n.thisMonthsRevenue}: '
-                '${formatEtb(monthlyRevenue.valueOrNull ?? 0)}',
-              ),
-              Text(l10n.earnedFromReturns),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => context.push('/rentals'),
-                child: Text(l10n.rentals),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: () => context.push('/customers'),
-                icon: const Icon(Icons.people_outline),
-                label: Text(l10n.customers),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: () => context.push('/materials'),
-                icon: const Icon(Icons.inventory_2_outlined),
-                label: Text(l10n.materials),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: () => context.push('/settings'),
-                icon: const Icon(Icons.settings_outlined),
-                label: Text(l10n.settings),
-              ),
-            ],
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  l10n.home,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 16),
+                Text(l10n.phase0Message, textAlign: TextAlign.center),
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  key: const ValueKey('home_new_rental_button'),
+                  onPressed: () => context.push('/rentals'),
+                  icon: const Icon(Icons.add_business_outlined),
+                  label: Text(l10n.newRental),
+                ),
+                const SizedBox(height: 12),
+                Text('${l10n.activeRentals}: $activeCount'),
+                Text('${l10n.itemsCurrentlyOut}: $itemsOut'),
+                Text(
+                  '${l10n.thisMonthsRevenue}: '
+                  '${formatEtb(monthlyRevenue.valueOrNull ?? 0)}',
+                ),
+                Text(l10n.earnedFromReturns),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => context.push('/rentals'),
+                  child: Text(l10n.rentals),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => context.push('/customers'),
+                  icon: const Icon(Icons.people_outline),
+                  label: Text(l10n.customers),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => context.push('/materials'),
+                  icon: const Icon(Icons.inventory_2_outlined),
+                  label: Text(l10n.materials),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => context.push('/settings'),
+                  icon: const Icon(Icons.settings_outlined),
+                  label: Text(l10n.settings),
+                ),
+              ],
             ),
           ),
         ),

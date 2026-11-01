@@ -480,4 +480,67 @@ class AppLocalizationsAm extends AppLocalizations {
   ) {
     return '$quantity ተመልሷል · $days ቀናት · $price · $amount';
   }
+
+  @override
+  String get voidRental => 'ኪራይን ሰርዝ';
+
+  @override
+  String get voidReturn => 'መመለሻን ሰርዝ';
+
+  @override
+  String get voidReason => 'የመሰረዝ ምክንያት';
+
+  @override
+  String get voidReasonRequired => 'ቢያንስ 5 ቁምፊዎችን ያስገቡ።';
+
+  @override
+  String get voidRentalWarning => 'መሰረዝ ኪራዩን ከድምር ያስወግዳል እና እቃውን ነፃ ያደርጋል።';
+
+  @override
+  String get voidReturnWarning =>
+      'መመለሻን መሰረዝ ከተገኘ ገቢ ያስወግዳል እና ያልተመለሰውን መጠን ይመልሳል።';
+
+  @override
+  String get voidConfirm => 'መሰረዙን አረጋግጥ';
+
+  @override
+  String get voidSuccess => 'በተሳካ ሁኔታ ተሰርዟል።';
+
+  @override
+  String get voidError => 'መሰረዝ አልተቻለም።';
+
+  @override
+  String voidedOn(Object date, Object reason) {
+    return 'በ$date ተሰርዟል፦ $reason';
+  }
+
+  @override
+  String get voidedFilter => 'የተሰረዘ';
+
+  @override
+  String get voidAndRecreate => 'ሰርዝ እና እንደገና ፍጠር';
+
+  @override
+  String get recreateWarning => 'አንዳንድ የቀድሞ እቃዎች ንቁ ወይም የሚገኙ ስላልሆኑ ይዘለላሉ።';
+
+  @override
+  String recreateNote(Object rentalNumber) {
+    return '$rentalNumberን ይተካል';
+  }
+
+  @override
+  String get auditHistory => 'የኦዲት ታሪክ';
+
+  @override
+  String get noAuditHistory => 'የኦዲት ታሪክ የለም።';
+
+  @override
+  String voidedAmount(Object amount) {
+    return 'የተሰረዘ፦ $amount';
+  }
+
+  @override
+  String voidedReturnReason(Object reason) {
+    return 'የተሰረዘ፦ $reason';
+  }
 }

@@ -67,6 +67,17 @@ final returnControllerProvider =
       ReturnController.new,
     );
 
+final rentalVoidControllerProvider =
+    AsyncNotifierProvider.autoDispose<RentalVoidController, void>(
+      RentalVoidController.new,
+    );
+
+final rentalAuditHistoryProvider = FutureProvider.autoDispose
+    .family<List<AuditHistoryEntry>, String>(
+      (ref, rentalId) =>
+          ref.watch(rentalRepositoryProvider).getAuditHistory(rentalId),
+    );
+
 class RentalEditorController extends AutoDisposeAsyncNotifier<void> {
   @override
   Future<void> build() async {}
@@ -117,6 +128,46 @@ class ReturnController extends AutoDisposeAsyncNotifier<void> {
       ref.invalidate(monthlyRevenueProvider);
       state = const AsyncData(null);
       return receipt;
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+}
+
+class RentalVoidController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> voidReturn(
+    String eventId,
+    String rentalId,
+    String reason,
+  ) async {
+    await _run(
+      () => ref.read(rentalRepositoryProvider).voidReturn(eventId, reason),
+      rentalId,
+    );
+  }
+
+  Future<void> voidRental(String rentalId, String reason) async {
+    await _run(
+      () => ref.read(rentalRepositoryProvider).voidRental(rentalId, reason),
+      rentalId,
+    );
+  }
+
+  Future<void> _run(Future<void> Function() action, String rentalId) async {
+    state = const AsyncLoading();
+    try {
+      await action();
+      ref.invalidate(rentalDetailProvider(rentalId));
+      ref.invalidate(returnEventsProvider(rentalId));
+      ref.invalidate(rentalAuditHistoryProvider(rentalId));
+      ref.invalidate(activeRentalsProvider);
+      ref.invalidate(rentalsProvider);
+      ref.invalidate(monthlyRevenueProvider);
+      state = const AsyncData(null);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;

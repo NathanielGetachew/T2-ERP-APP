@@ -28,3 +28,10 @@
 - Each return event stores its calendar billable days, integer amount, and price/day snapshot.
 - Earned revenue is the sum of return-event amounts grouped by the local month of `returnedAt`.
 - Returns cannot be edited in this slice; a correction/void flow is planned for Phase 2.
+
+# Phase 2 — Void and correction flows
+
+- Voiding never deletes evidence; a trimmed reason of at least five characters is mandatory and the change is audited.
+- Return events must be voided before their rental can be voided. Voiding a return restores its outstanding quantity and recalculates rental status.
+- Voided returns and rentals are excluded from earned revenue, stock usage, estimates, and Home/list statistics, while remaining visible in history.
+- Void and recreate creates a new rental record at the current time and keeps the original record voided.

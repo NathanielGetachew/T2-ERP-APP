@@ -10,6 +10,8 @@ class RentalRecord {
     required this.notes,
     required this.createdAt,
     required this.updatedAt,
+    this.voidedAt,
+    this.voidReason,
   });
 
   final String id;
@@ -20,6 +22,8 @@ class RentalRecord {
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? voidedAt;
+  final String? voidReason;
 }
 
 class RentalLine {
@@ -63,6 +67,8 @@ class ReturnEventRecord {
     required this.pricePerDaySnapshot,
     required this.conditionNote,
     required this.createdAt,
+    this.voidedAt,
+    this.voidReason,
   });
 
   final String id;
@@ -75,6 +81,8 @@ class ReturnEventRecord {
   final int pricePerDaySnapshot;
   final String? conditionNote;
   final DateTime createdAt;
+  final DateTime? voidedAt;
+  final String? voidReason;
 }
 
 class ReturnLineInput {
@@ -114,4 +122,16 @@ class RentalDetails {
   final RentalRecord rental;
   final List<RentalLine> lines;
   final String customerName;
+}
+
+class AuditHistoryEntry {
+  const AuditHistoryEntry({
+    required this.action,
+    required this.at,
+    required this.description,
+  });
+
+  final String action;
+  final DateTime at;
+  final String description;
 }

@@ -87,6 +87,8 @@ class ReturnEvents extends Table {
   IntColumn get amount => integer()();
   IntColumn get pricePerDaySnapshot =>
       integer().withDefault(const Constant(0))();
+  DateTimeColumn get voidedAt => dateTime().nullable()();
+  TextColumn get voidReason => text().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -125,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -157,6 +159,10 @@ class AppDatabase extends _$AppDatabase {
           'WHERE rental_items.id = return_events.rental_item_id) '
           'WHERE price_per_day_snapshot = 0',
         );
+      }
+      if (from < 4) {
+        await m.addColumn(returnEvents, returnEvents.voidedAt);
+        await m.addColumn(returnEvents, returnEvents.voidReason);
       }
     },
   );

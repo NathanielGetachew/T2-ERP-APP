@@ -69,6 +69,10 @@ class _RentalsScreenState extends ConsumerState<RentalsScreen> {
                   value: RentalStatus.returned,
                   label: Text(l10n.returned),
                 ),
+                ButtonSegment(
+                  value: RentalStatus.voided,
+                  label: Text(l10n.voidedFilter),
+                ),
                 ButtonSegment(value: null, label: Text(l10n.all)),
               ],
               selected: {filter},
@@ -139,18 +143,27 @@ class _RentalTile extends ConsumerWidget {
       0,
       (sum, event) => sum + event.amount,
     );
-    return ListTile(
-      onTap: onTap,
-      title: Text(formatRentalNumber(rental.rentalNumber)),
-      subtitle: Text('${details.customerName}\n${rental.rentedAt.toLocal()}'),
-      isThreeLine: true,
-      trailing: isActive
-          ? Text('${l10n.estimate}: ${formatEtb(estimate!)}')
-          : Text(
-              rental.status == RentalStatus.returned && finalTotal != null
-                  ? '${l10n.finalTotal}: ${formatEtb(finalTotal)}'
-                  : _statusLabel(l10n, rental.status),
-            ),
+    return Opacity(
+      opacity: rental.status == RentalStatus.voided ? 0.58 : 1,
+      child: ListTile(
+        onTap: onTap,
+        title: Row(
+          children: [
+            Expanded(child: Text(formatRentalNumber(rental.rentalNumber))),
+            if (rental.status == RentalStatus.voided)
+              Chip(label: Text(l10n.voided)),
+          ],
+        ),
+        subtitle: Text('${details.customerName}\n${rental.rentedAt.toLocal()}'),
+        isThreeLine: true,
+        trailing: isActive
+            ? Text('${l10n.estimate}: ${formatEtb(estimate!)}')
+            : Text(
+                rental.status == RentalStatus.returned && finalTotal != null
+                    ? '${l10n.finalTotal}: ${formatEtb(finalTotal)}'
+                    : _statusLabel(l10n, rental.status),
+              ),
+      ),
     );
   }
 }

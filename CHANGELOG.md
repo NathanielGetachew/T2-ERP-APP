@@ -23,3 +23,4 @@
 - Fixed Slice C audit Value typing, stock-override exception coverage, billing estimate arithmetic, and editor form lints.
 - Added Phase 1 return recording, return summaries, per-event billing, and earned monthly revenue.
 - Fixed Slice D test import ambiguity, billing summary expectation, and Home smoke-test overflow.
+- Added Phase 2 Slice A audited void and correction flows for returns and rentals, including v4 return-event void metadata and void-and-recreate navigation.

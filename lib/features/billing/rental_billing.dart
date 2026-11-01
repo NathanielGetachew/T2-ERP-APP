@@ -59,8 +59,15 @@ RentalSummary rentalSummary({
 }) {
   final earned = returnEvents.fold<int>(
     0,
-    (total, event) => total + event.amount,
+    (total, event) => total + (event.voidedAt == null ? event.amount : 0),
   );
+  if (rental.status == RentalStatus.voided) {
+    return RentalSummary(
+      earnedTotal: 0,
+      outstandingEstimate: 0,
+      grandTotalEstimate: 0,
+    );
+  }
   final outstanding = rentalEstimate(
     lines.map(
       (line) => (

@@ -282,17 +282,26 @@ class _CustomerRentalHistoryTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final events = details.rental.status == RentalStatus.returned
-        ? ref.watch(returnEventsProvider(details.rental.id)).valueOrNull
-        : null;
-    final total = events?.fold<int>(0, (sum, event) => sum + event.amount);
+    final events = ref
+        .watch(returnEventsProvider(details.rental.id))
+        .valueOrNull;
+    final total = events?.fold<int>(
+      0,
+      (sum, event) => sum + (event.voidedAt == null ? event.amount : 0),
+    );
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(formatRentalNumber(details.rental.rentalNumber)),
       subtitle: Text(details.rental.rentedAt.toLocal().toString()),
-      trailing: total == null
+      trailing: details.rental.status == RentalStatus.voided
+          ? Chip(label: Text(l10n.voided))
+          : total == null
           ? null
-          : Text('${l10n.finalTotal}: ${formatEtb(total)}'),
+          : Text(
+              details.rental.status == RentalStatus.returned
+                  ? '${l10n.finalTotal}: ${formatEtb(total)}'
+                  : '${l10n.estimate}: ${formatEtb(total)}',
+            ),
       onTap: onTap,
     );
   }

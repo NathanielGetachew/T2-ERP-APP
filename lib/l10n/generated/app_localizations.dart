@@ -997,6 +997,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{quantity} returned · {days} days · {price} · {amount}'**
   String summaryLine(Object amount, Object days, Object price, Object quantity);
+
+  /// No description provided for @voidRental.
+  ///
+  /// In en, this message translates to:
+  /// **'Void rental'**
+  String get voidRental;
+
+  /// No description provided for @voidReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Void return'**
+  String get voidReturn;
+
+  /// No description provided for @voidReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for voiding'**
+  String get voidReason;
+
+  /// No description provided for @voidReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 5 characters.'**
+  String get voidReasonRequired;
+
+  /// No description provided for @voidRentalWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiding hides this rental from totals and frees its stock. This cannot be undone.'**
+  String get voidRentalWarning;
+
+  /// No description provided for @voidReturnWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiding removes this return from earned totals and restores its outstanding quantity.'**
+  String get voidReturnWarning;
+
+  /// No description provided for @voidConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm void'**
+  String get voidConfirm;
+
+  /// No description provided for @voidSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided successfully.'**
+  String get voidSuccess;
+
+  /// No description provided for @voidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not void this record.'**
+  String get voidError;
+
+  /// No description provided for @voidedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided on {date}: {reason}'**
+  String voidedOn(Object date, Object reason);
+
+  /// No description provided for @voidedFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided'**
+  String get voidedFilter;
+
+  /// No description provided for @voidAndRecreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Void and recreate'**
+  String get voidAndRecreate;
+
+  /// No description provided for @recreateWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Some original materials are no longer active or available and will be skipped.'**
+  String get recreateWarning;
+
+  /// No description provided for @recreateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces {rentalNumber}'**
+  String recreateNote(Object rentalNumber);
+
+  /// No description provided for @auditHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit history'**
+  String get auditHistory;
+
+  /// No description provided for @noAuditHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No audit history.'**
+  String get noAuditHistory;
+
+  /// No description provided for @voidedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided: {amount}'**
+  String voidedAmount(Object amount);
+
+  /// No description provided for @voidedReturnReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Voided: {reason}'**
+  String voidedReturnReason(Object reason);
 }
 
 class _AppLocalizationsDelegate

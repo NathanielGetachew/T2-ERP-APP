@@ -484,4 +484,69 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$quantity returned · $days days · $price · $amount';
   }
+
+  @override
+  String get voidRental => 'Void rental';
+
+  @override
+  String get voidReturn => 'Void return';
+
+  @override
+  String get voidReason => 'Reason for voiding';
+
+  @override
+  String get voidReasonRequired => 'Enter at least 5 characters.';
+
+  @override
+  String get voidRentalWarning =>
+      'Voiding hides this rental from totals and frees its stock. This cannot be undone.';
+
+  @override
+  String get voidReturnWarning =>
+      'Voiding removes this return from earned totals and restores its outstanding quantity.';
+
+  @override
+  String get voidConfirm => 'Confirm void';
+
+  @override
+  String get voidSuccess => 'Voided successfully.';
+
+  @override
+  String get voidError => 'Could not void this record.';
+
+  @override
+  String voidedOn(Object date, Object reason) {
+    return 'Voided on $date: $reason';
+  }
+
+  @override
+  String get voidedFilter => 'Voided';
+
+  @override
+  String get voidAndRecreate => 'Void and recreate';
+
+  @override
+  String get recreateWarning =>
+      'Some original materials are no longer active or available and will be skipped.';
+
+  @override
+  String recreateNote(Object rentalNumber) {
+    return 'Replaces $rentalNumber';
+  }
+
+  @override
+  String get auditHistory => 'Audit history';
+
+  @override
+  String get noAuditHistory => 'No audit history.';
+
+  @override
+  String voidedAmount(Object amount) {
+    return 'Voided: $amount';
+  }
+
+  @override
+  String voidedReturnReason(Object reason) {
+    return 'Voided: $reason';
+  }
 }

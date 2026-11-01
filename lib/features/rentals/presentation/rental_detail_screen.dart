@@ -25,6 +25,47 @@ class RentalDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: const SafeBackButton(),
         title: Text(l10n.rentalDetails),
+        actions: [
+          if (details.valueOrNull?.rental.status != null)
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'void') {
+                  _showVoidDialog(context, ref, rentalId, null);
+                }
+                if (value == 'recreate') {
+                  final current = details.valueOrNull;
+                  if (current != null) {
+                    context.push('/rentals/new', extra: current);
+                  }
+                }
+              },
+              itemBuilder: (context) {
+                final current = details.valueOrNull!;
+                final hasActiveReturns =
+                    current.rental.status != RentalStatus.active &&
+                    current.rental.status != RentalStatus.voided;
+                if (current.rental.status == RentalStatus.voided) {
+                  return [
+                    PopupMenuItem(
+                      value: 'recreate',
+                      child: Text(l10n.voidAndRecreate),
+                    ),
+                  ];
+                }
+                return [
+                  PopupMenuItem(
+                    value: hasActiveReturns ? 'blocked' : 'void',
+                    enabled: !hasActiveReturns,
+                    child: Text(
+                      hasActiveReturns
+                          ? '${l10n.voidRental} (${l10n.voidReturnWarning})'
+                          : l10n.voidRental,
+                    ),
+                  ),
+                ];
+              },
+            ),
+        ],
       ),
       body: details.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -37,7 +78,7 @@ class RentalDetailScreen extends ConsumerWidget {
               returnEvents.valueOrNull ?? const <ReturnEventRecord>[];
           final earned = events.fold<int>(
             0,
-            (sum, event) => sum + event.amount,
+            (sum, event) => sum + (event.voidedAt == null ? event.amount : 0),
           );
           final days = billableDays(
             rental.rentedAt,
@@ -59,6 +100,19 @@ class RentalDetailScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (rental.status == RentalStatus.voided)
+                Card(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      l10n.voidedOn(
+                        _date(context, rental.voidedAt ?? rental.updatedAt),
+                        rental.voidReason ?? '',
+                      ),
+                    ),
+                  ),
+                ),
               Text(
                 formatRentalNumber(rental.rentalNumber),
                 style: Theme.of(context).textTheme.headlineSmall,
@@ -91,21 +145,48 @@ class RentalDetailScreen extends ConsumerWidget {
                 ...events.map(
                   (event) => ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(_lineName(item, event)),
-                    subtitle: Text(
-                      l10n.returnHistoryLine(
-                        formatEtb(event.amount),
-                        _date(context, event.returnedAt),
-                        event.billableDays,
-                        _lineName(item, event),
-                        event.quantity,
-                      ),
+                    title: Text(
+                      _lineName(item, event),
+                      style: event.voidedAt == null
+                          ? null
+                          : const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                            ),
                     ),
+                    subtitle: Text(
+                      event.voidedAt == null
+                          ? l10n.returnHistoryLine(
+                              formatEtb(event.amount),
+                              _date(context, event.returnedAt),
+                              event.billableDays,
+                              _lineName(item, event),
+                              event.quantity,
+                            )
+                          : '${l10n.voidedAmount(formatEtb(event.amount))}\n'
+                                '${l10n.voidedReturnReason(event.voidReason ?? '')}',
+                    ),
+                    trailing: event.voidedAt == null
+                        ? PopupMenuButton<String>(
+                            onSelected: (_) => _showVoidDialog(
+                              context,
+                              ref,
+                              rentalId,
+                              event.id,
+                            ),
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'void',
+                                child: Text(l10n.voidReturn),
+                              ),
+                            ],
+                          )
+                        : Text(l10n.voided),
                   ),
                 ),
               const SizedBox(height: 16),
               if (earned > 0) Text('${l10n.earnedSoFar}: ${formatEtb(earned)}'),
-              if (rental.status != RentalStatus.returned)
+              if (rental.status == RentalStatus.active ||
+                  rental.status == RentalStatus.partiallyReturned)
                 Text('${l10n.outstandingEstimate}: ${formatEtb(estimate)}'),
               if (rental.status == RentalStatus.returned)
                 Text(
@@ -120,16 +201,110 @@ class RentalDetailScreen extends ConsumerWidget {
                   onPressed: () => context.push('/rentals/$rentalId/return'),
                   child: Text(l10n.returnAction),
                 ),
-              TextButton(
-                onPressed: () =>
-                    context.push('/customers/${rental.customerId}'),
-                child: Text(l10n.viewCustomer),
+              FutureBuilder<List<AuditHistoryEntry>>(
+                future: ref
+                    .read(rentalRepositoryProvider)
+                    .getAuditHistory(rentalId),
+                builder: (context, snapshot) => ExpansionTile(
+                  title: Text(l10n.auditHistory),
+                  children: snapshot.data == null
+                      ? [Text(l10n.noAuditHistory)]
+                      : snapshot.data!
+                            .map(
+                              (entry) => ListTile(
+                                title: Text(entry.action),
+                                subtitle: Text(entry.description),
+                                trailing: Text(_date(context, entry.at)),
+                              ),
+                            )
+                            .toList(),
+                ),
               ),
+              if (rental.status != RentalStatus.voided)
+                TextButton(
+                  onPressed: () =>
+                      context.push('/customers/${rental.customerId}'),
+                  child: Text(l10n.viewCustomer),
+                ),
             ],
           );
         },
       ),
     );
+  }
+}
+
+Future<void> _showVoidDialog(
+  BuildContext context,
+  WidgetRef ref,
+  String rentalId,
+  String? eventId,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final controller = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(eventId == null ? l10n.voidRental : l10n.voidReturn),
+      content: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              eventId == null ? l10n.voidRentalWarning : l10n.voidReturnWarning,
+            ),
+            TextFormField(
+              controller: controller,
+              autofocus: true,
+              decoration: InputDecoration(labelText: l10n.voidReason),
+              validator: (value) => value == null || value.trim().length < 5
+                  ? l10n.voidReasonRequired
+                  : null,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(dialogContext).colorScheme.error,
+          ),
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              Navigator.of(dialogContext).pop(true);
+            }
+          },
+          child: Text(l10n.voidConfirm),
+        ),
+      ],
+    ),
+  );
+  if (!context.mounted || confirmed != true) return;
+  try {
+    if (eventId == null) {
+      await ref
+          .read(rentalVoidControllerProvider.notifier)
+          .voidRental(rentalId, controller.text);
+    } else {
+      await ref
+          .read(rentalVoidControllerProvider.notifier)
+          .voidReturn(eventId, rentalId, controller.text);
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.voidSuccess)));
+  } catch (_) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.voidError)));
+  } finally {
+    controller.dispose();
   }
 }
 

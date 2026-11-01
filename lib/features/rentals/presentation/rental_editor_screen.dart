@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,9 +14,12 @@ import '../../materials/domain/rental_material.dart';
 import '../application/rental_providers.dart';
 import '../domain/rental.dart';
 import '../domain/rental_repository.dart';
+import '../domain/rental_number.dart';
 
 class RentalEditorScreen extends ConsumerStatefulWidget {
-  const RentalEditorScreen({super.key});
+  const RentalEditorScreen({super.key, this.recreateFrom});
+
+  final RentalDetails? recreateFrom;
 
   @override
   ConsumerState<RentalEditorScreen> createState() => _RentalEditorScreenState();
@@ -28,6 +33,56 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
   final _quantityController = TextEditingController(text: '1');
   final _lines = <RentalLineDraft>[];
   String? _error;
+  bool _recreateSkipped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final source = widget.recreateFrom;
+    if (source != null) {
+      _customerId = source.rental.customerId;
+      unawaited(_prepareRecreate(source));
+    }
+  }
+
+  Future<void> _prepareRecreate(RentalDetails source) async {
+    final materials = await ref.read(materialsProvider.future);
+    final lines = <RentalLineDraft>[];
+    var skipped = false;
+    for (final sourceLine in source.lines) {
+      RentalMaterial? material;
+      for (final item in materials) {
+        if (item.id == sourceLine.materialId) {
+          material = item;
+          break;
+        }
+      }
+      final available = material == null
+          ? null
+          : await ref
+                .read(rentalRepositoryProvider)
+                .availableStock(material.id);
+      if (material == null ||
+          !material.isActive ||
+          (available != null && available < sourceLine.quantity)) {
+        skipped = true;
+        continue;
+      }
+      lines.add(
+        RentalLineDraft(
+          materialId: sourceLine.materialId,
+          quantity: sourceLine.quantity,
+        ),
+      );
+    }
+    if (!mounted) return;
+    setState(() {
+      _lines
+        ..clear()
+        ..addAll(lines);
+      _recreateSkipped = skipped;
+    });
+  }
 
   @override
   void dispose() {
@@ -39,6 +94,11 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (widget.recreateFrom != null && _notesController.text.isEmpty) {
+      _notesController.text = l10n.recreateNote(
+        formatRentalNumber(widget.recreateFrom!.rental.rentalNumber),
+      );
+    }
     final customers = ref.watch(customersProvider);
     final materials = ref.watch(materialsProvider);
     return PopScope(
@@ -169,7 +229,14 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
               ),
               if (_lines.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                ..._lines.asMap().entries.map(
+                if (widget.recreateFrom != null && _recreateSkipped)
+                  Text(
+                    l10n.recreateWarning,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ..._effectiveLines(materials.valueOrNull).asMap().entries.map(
                   (entry) => ListTile(
                     title: Text(
                       _materialName(
@@ -252,7 +319,7 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
     if (items == null) {
       return 0;
     }
-    return _lines.fold<int>(0, (total, line) {
+    return _effectiveLines(items).fold<int>(0, (total, line) {
       for (final material in items) {
         if (material.id == line.materialId) {
           return total + material.pricePerDay * line.quantity;
@@ -263,7 +330,8 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate() || _lines.isEmpty) {
+    final lines = _effectiveLines(ref.read(materialsProvider).valueOrNull);
+    if (!_formKey.currentState!.validate() || lines.isEmpty) {
       setState(
         () => _error = _lines.isEmpty
             ? AppLocalizations.of(context)!.atLeastOneLine
@@ -276,7 +344,7 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
           .read(rentalEditorProvider.notifier)
           .createRental(
             customerId: _customerId!,
-            lines: _lines,
+            lines: lines,
             notes: _notesController.text,
           );
       if (mounted) {
@@ -313,12 +381,13 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
   }
 
   Future<void> _saveWithOverride() async {
+    final lines = _effectiveLines(ref.read(materialsProvider).valueOrNull);
     try {
       final result = await ref
           .read(rentalEditorProvider.notifier)
           .createRental(
             customerId: _customerId!,
-            lines: _lines,
+            lines: lines,
             notes: _notesController.text,
             stockOverrideConfirmed: true,
           );
@@ -326,5 +395,14 @@ class _RentalEditorScreenState extends ConsumerState<RentalEditorScreen> {
     } catch (error) {
       if (mounted) setState(() => _error = error.toString());
     }
+  }
+
+  List<RentalLineDraft> _effectiveLines(List<RentalMaterial>? materials) {
+    if (materials == null) return _lines;
+    final activeIds = materials
+        .where((material) => material.isActive)
+        .map((material) => material.id)
+        .toSet();
+    return _lines.where((line) => activeIds.contains(line.materialId)).toList();
   }
 }

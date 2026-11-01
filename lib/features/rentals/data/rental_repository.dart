@@ -490,10 +490,218 @@ class DriftRentalRepository implements RentalRepository {
         .where((event) {
           final local = event.returnedAt.toLocal();
           return validRentalIds.contains(event.rentalId) &&
+              event.voidedAt == null &&
               local.year == year &&
               local.month == month;
         })
         .fold<int>(0, (sum, event) => sum + event.amount);
+  }
+
+  @override
+  Future<void> voidReturn(String returnEventId, String reason) async {
+    final normalizedReason = reason.trim();
+    if (normalizedReason.length < 5) {
+      throw const RentalValidationException(
+        'A void reason must be at least 5 characters.',
+      );
+    }
+    await database.transaction(() async {
+      final event = await (database.select(
+        database.returnEvents,
+      )..where((table) => table.id.equals(returnEventId))).getSingleOrNull();
+      if (event == null) {
+        throw const RentalValidationException('Return event not found.');
+      }
+      if (event.voidedAt != null) {
+        throw const RentalValidationException('This return is already voided.');
+      }
+      final rental = await (database.select(
+        database.rentals,
+      )..where((table) => table.id.equals(event.rentalId))).getSingleOrNull();
+      if (rental == null) {
+        throw const RentalValidationException('Rental not found.');
+      }
+      if (rental.voidedAt != null ||
+          rental.status == RentalStatus.voided.name) {
+        throw const RentalValidationException(
+          'A return on a voided rental cannot be changed.',
+        );
+      }
+      final now = clock.now().toUtc();
+      await (database.update(
+        database.returnEvents,
+      )..where((table) => table.id.equals(returnEventId))).write(
+        db.ReturnEventsCompanion(
+          voidedAt: Value(now),
+          voidReason: Value(normalizedReason),
+          updatedAt: Value(now),
+        ),
+      );
+      final item = await (database.select(
+        database.rentalItems,
+      )..where((table) => table.id.equals(event.rentalItemId))).getSingle();
+      final newQuantityReturned = item.quantityReturned - event.quantity;
+      await (database.update(
+        database.rentalItems,
+      )..where((table) => table.id.equals(item.id))).write(
+        db.RentalItemsCompanion(
+          quantityReturned: Value(newQuantityReturned),
+          updatedAt: Value(now),
+        ),
+      );
+      final items = await (database.select(
+        database.rentalItems,
+      )..where((table) => table.rentalId.equals(rental.id))).get();
+      final returned = items.fold<int>(
+        0,
+        (sum, line) => sum + line.quantityReturned,
+      );
+      final total = items.fold<int>(0, (sum, line) => sum + line.quantity);
+      final newStatus = returned == 0
+          ? RentalStatus.active
+          : returned >= total
+          ? RentalStatus.returned
+          : RentalStatus.partiallyReturned;
+      await (database.update(
+        database.rentals,
+      )..where((table) => table.id.equals(rental.id))).write(
+        db.RentalsCompanion(
+          status: Value(newStatus.name),
+          updatedAt: Value(now),
+        ),
+      );
+      await database
+          .into(database.auditLogs)
+          .insert(
+            db.AuditLogsCompanion.insert(
+              id: _uuidV4(),
+              createdAt: now,
+              updatedAt: now,
+              entityType: 'rental',
+              entityId: rental.id,
+              action: 'returnVoided',
+              oldValue: Value(
+                jsonEncode({
+                  'status': rental.status,
+                  'quantityReturned': item.quantityReturned,
+                }),
+              ),
+              newValue: Value(
+                jsonEncode({
+                  'rentalNumber': rental.rentalNumber,
+                  'returnEventId': event.id,
+                  'quantity': event.quantity,
+                  'days': event.billableDays,
+                  'amount': event.amount,
+                  'reason': normalizedReason,
+                  'oldStatus': rental.status,
+                  'newStatus': newStatus.name,
+                }),
+              ),
+              at: now,
+              by: 'local-user',
+            ),
+          );
+    });
+  }
+
+  @override
+  Future<void> voidRental(String rentalId, String reason) async {
+    final normalizedReason = reason.trim();
+    if (normalizedReason.length < 5) {
+      throw const RentalValidationException(
+        'A void reason must be at least 5 characters.',
+      );
+    }
+    await database.transaction(() async {
+      final rental = await (database.select(
+        database.rentals,
+      )..where((table) => table.id.equals(rentalId))).getSingleOrNull();
+      if (rental == null) {
+        throw const RentalValidationException('Rental not found.');
+      }
+      if (rental.voidedAt != null ||
+          rental.status == RentalStatus.voided.name) {
+        throw const RentalValidationException('This rental is already voided.');
+      }
+      final events =
+          await (database.select(database.returnEvents)..where(
+                (table) =>
+                    table.rentalId.equals(rentalId) & table.voidedAt.isNull(),
+              ))
+              .get();
+      if (events.isNotEmpty) {
+        throw const RentalValidationException(
+          'Void all returns before voiding this rental.',
+        );
+      }
+      final lines = await (database.select(
+        database.rentalItems,
+      )..where((table) => table.rentalId.equals(rentalId))).get();
+      final now = clock.now().toUtc();
+      await (database.update(
+        database.rentals,
+      )..where((table) => table.id.equals(rentalId))).write(
+        db.RentalsCompanion(
+          status: Value(RentalStatus.voided.name),
+          voidedAt: Value(now),
+          voidReason: Value(normalizedReason),
+          updatedAt: Value(now),
+        ),
+      );
+      await database
+          .into(database.auditLogs)
+          .insert(
+            db.AuditLogsCompanion.insert(
+              id: _uuidV4(),
+              createdAt: now,
+              updatedAt: now,
+              entityType: 'rental',
+              entityId: rental.id,
+              action: 'rentalVoided',
+              newValue: Value(
+                jsonEncode({
+                  'rentalNumber': rental.rentalNumber,
+                  'customerId': rental.customerId,
+                  'rentedAt': rental.rentedAt.toIso8601String(),
+                  'oldStatus': rental.status,
+                  'newStatus': RentalStatus.voided.name,
+                  'reason': normalizedReason,
+                  'lines': lines
+                      .map(
+                        (line) => {
+                          'rentalItemId': line.id,
+                          'materialName': line.materialNameSnapshot,
+                          'quantity': line.quantity,
+                          'pricePerDaySnapshot': line.pricePerDaySnapshot,
+                        },
+                      )
+                      .toList(),
+                }),
+              ),
+              at: now,
+              by: 'local-user',
+            ),
+          );
+    });
+  }
+
+  @override
+  Future<List<AuditHistoryEntry>> getAuditHistory(String rentalId) async {
+    final rows =
+        await (database.select(database.auditLogs)
+              ..where((table) => table.entityId.equals(rentalId))
+              ..orderBy([(table) => OrderingTerm.desc(table.at)]))
+            .get();
+    return rows
+        .map(
+          (row) => AuditHistoryEntry(
+            action: row.action,
+            at: row.at.toUtc(),
+            description: row.action,
+          ),
+        )
+        .toList();
   }
 
   Future<int?> _availableStockInTransaction(
@@ -562,6 +770,8 @@ class DriftRentalRepository implements RentalRepository {
     notes: row.notes,
     createdAt: row.createdAt.toUtc(),
     updatedAt: updatedAt ?? row.updatedAt.toUtc(),
+    voidedAt: row.voidedAt?.toUtc(),
+    voidReason: row.voidReason,
   );
 
   static RentalLine _lineFromRow(db.RentalItemRow row) => RentalLine(
@@ -586,6 +796,8 @@ class DriftRentalRepository implements RentalRepository {
         pricePerDaySnapshot: row.pricePerDaySnapshot,
         conditionNote: row.conditionNote,
         createdAt: row.createdAt.toUtc(),
+        voidedAt: row.voidedAt?.toUtc(),
+        voidReason: row.voidReason,
       );
 
   static String _formatNumber(int number) =>

@@ -44,4 +44,10 @@ abstract interface class RentalRepository {
   Future<List<ReturnEventRecord>> getReturnEvents(String rentalId);
 
   Future<int> monthlyRevenue(int year, int month);
+
+  Future<void> voidReturn(String returnEventId, String reason);
+
+  Future<void> voidRental(String rentalId, String reason);
+
+  Future<List<AuditHistoryEntry>> getAuditHistory(String rentalId);
 }
