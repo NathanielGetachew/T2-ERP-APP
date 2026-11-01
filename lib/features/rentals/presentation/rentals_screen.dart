@@ -132,6 +132,13 @@ class _RentalTile extends ConsumerWidget {
             localOffset: DateTime.now().timeZoneOffset,
           )
         : null;
+    final returnedEvents = rental.status == RentalStatus.returned
+        ? ref.watch(returnEventsProvider(rental.id)).valueOrNull
+        : null;
+    final finalTotal = returnedEvents?.fold<int>(
+      0,
+      (sum, event) => sum + event.amount,
+    );
     return ListTile(
       onTap: onTap,
       title: Text(formatRentalNumber(rental.rentalNumber)),
@@ -139,7 +146,11 @@ class _RentalTile extends ConsumerWidget {
       isThreeLine: true,
       trailing: isActive
           ? Text('${l10n.estimate}: ${formatEtb(estimate!)}')
-          : Text(_statusLabel(l10n, rental.status)),
+          : Text(
+              rental.status == RentalStatus.returned && finalTotal != null
+                  ? '${l10n.finalTotal}: ${formatEtb(finalTotal)}'
+                  : _statusLabel(l10n, rental.status),
+            ),
     );
   }
 }

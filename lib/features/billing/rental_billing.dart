@@ -1,3 +1,5 @@
+import '../rentals/domain/rental.dart';
+
 /// Billing uses an injected local offset so calendar-day behavior is
 /// deterministic in tests and does not depend on the test machine timezone.
 int billableDays(
@@ -28,6 +30,54 @@ int lineAmount(int quantity, int pricePerDaySnapshot, int days) {
     throw ArgumentError.value(days, 'days', 'Must be greater than 0.');
   }
   return quantity * pricePerDaySnapshot * days;
+}
+
+int returnLineAmount({
+  required int quantity,
+  required int pricePerDaySnapshot,
+  required int days,
+}) => lineAmount(quantity, pricePerDaySnapshot, days);
+
+class RentalSummary {
+  const RentalSummary({
+    required this.earnedTotal,
+    required this.outstandingEstimate,
+    required this.grandTotalEstimate,
+  });
+
+  final int earnedTotal;
+  final int outstandingEstimate;
+  final int grandTotalEstimate;
+}
+
+RentalSummary rentalSummary({
+  required RentalRecord rental,
+  required Iterable<RentalLine> lines,
+  required Iterable<ReturnEventRecord> returnEvents,
+  required DateTime asOfUtc,
+  required Duration localOffset,
+}) {
+  final earned = returnEvents.fold<int>(
+    0,
+    (total, event) => total + event.amount,
+  );
+  final outstanding = rentalEstimate(
+    lines.map(
+      (line) => (
+        quantity: line.quantity,
+        quantityReturned: line.quantityReturned,
+        pricePerDaySnapshot: line.pricePerDaySnapshot,
+      ),
+    ),
+    rentedAtUtc: rental.rentedAt,
+    asOfUtc: asOfUtc,
+    localOffset: localOffset,
+  );
+  return RentalSummary(
+    earnedTotal: earned,
+    outstandingEstimate: outstanding,
+    grandTotalEstimate: earned + outstanding,
+  );
 }
 
 int rentalEstimate(

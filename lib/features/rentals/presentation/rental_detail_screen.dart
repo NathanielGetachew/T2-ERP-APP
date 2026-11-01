@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/utils/clock_provider.dart';
@@ -31,6 +32,13 @@ class RentalDetailScreen extends ConsumerWidget {
         data: (item) {
           if (item == null) return Center(child: Text(l10n.rentalNotFound));
           final rental = item.rental;
+          final returnEvents = ref.watch(returnEventsProvider(rentalId));
+          final events =
+              returnEvents.valueOrNull ?? const <ReturnEventRecord>[];
+          final earned = events.fold<int>(
+            0,
+            (sum, event) => sum + event.amount,
+          );
           final days = billableDays(
             rental.rentedAt,
             ref.read(clockProvider).now(),
@@ -73,10 +81,45 @@ class RentalDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('${l10n.estimateIfReturnedToday}: ${formatEtb(estimate)}'),
+              Text(
+                l10n.returnHistory,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              if (events.isEmpty)
+                Text(l10n.noReturnHistory)
+              else
+                ...events.map(
+                  (event) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(_lineName(item, event)),
+                    subtitle: Text(
+                      l10n.returnHistoryLine(
+                        formatEtb(event.amount),
+                        _date(context, event.returnedAt),
+                        event.billableDays,
+                        _lineName(item, event),
+                        event.quantity,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              if (earned > 0) Text('${l10n.earnedSoFar}: ${formatEtb(earned)}'),
+              if (rental.status != RentalStatus.returned)
+                Text('${l10n.outstandingEstimate}: ${formatEtb(estimate)}'),
+              if (rental.status == RentalStatus.returned)
+                Text(
+                  '${l10n.finalTotal}: ${formatEtb(earned)}',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               if (rental.notes != null) Text('${l10n.notes}: ${rental.notes}'),
               const SizedBox(height: 24),
-              FilledButton(onPressed: null, child: Text(l10n.returnComingNext)),
+              if (rental.status == RentalStatus.active ||
+                  rental.status == RentalStatus.partiallyReturned)
+                FilledButton(
+                  onPressed: () => context.push('/rentals/$rentalId/return'),
+                  child: Text(l10n.returnAction),
+                ),
               TextButton(
                 onPressed: () =>
                     context.push('/customers/${rental.customerId}'),
@@ -88,6 +131,18 @@ class RentalDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _lineName(RentalDetails details, ReturnEventRecord event) {
+  for (final line in details.lines) {
+    if (line.id == event.rentalItemId) return line.materialNameSnapshot;
+  }
+  return event.rentalItemId;
+}
+
+String _date(BuildContext context, DateTime value) {
+  final locale = Localizations.localeOf(context).toLanguageTag();
+  return DateFormat.yMd(locale).add_jm().format(value.toLocal());
 }
 
 String _statusLabel(AppLocalizations l10n, RentalStatus status) {

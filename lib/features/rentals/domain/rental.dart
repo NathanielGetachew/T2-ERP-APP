@@ -51,6 +51,59 @@ class RentalLineDraft {
   final int quantity;
 }
 
+class ReturnEventRecord {
+  const ReturnEventRecord({
+    required this.id,
+    required this.rentalId,
+    required this.rentalItemId,
+    required this.quantity,
+    required this.returnedAt,
+    required this.billableDays,
+    required this.amount,
+    required this.pricePerDaySnapshot,
+    required this.conditionNote,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String rentalId;
+  final String rentalItemId;
+  final int quantity;
+  final DateTime returnedAt;
+  final int billableDays;
+  final int amount;
+  final int pricePerDaySnapshot;
+  final String? conditionNote;
+  final DateTime createdAt;
+}
+
+class ReturnLineInput {
+  const ReturnLineInput({required this.rentalItemId, required this.quantity});
+
+  final String rentalItemId;
+  final int quantity;
+}
+
+class ReturnReceipt {
+  const ReturnReceipt({
+    required this.rental,
+    required this.customerName,
+    required this.events,
+    required this.total,
+    required this.status,
+    required this.lines,
+    required this.remainingOutstanding,
+  });
+
+  final RentalRecord rental;
+  final String customerName;
+  final List<ReturnEventRecord> events;
+  final int total;
+  final RentalStatus status;
+  final List<RentalLine> lines;
+  final List<RentalLine> remainingOutstanding;
+}
+
 class RentalDetails {
   const RentalDetails({
     required this.rental,

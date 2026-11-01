@@ -44,9 +44,27 @@ final rentalsByCustomerProvider = StreamProvider.autoDispose
           ref.watch(rentalRepositoryProvider).watchByCustomer(customerId),
     );
 
+final returnEventsProvider = StreamProvider.autoDispose
+    .family<List<ReturnEventRecord>, String>(
+      (ref, rentalId) =>
+          ref.watch(rentalRepositoryProvider).watchReturnEvents(rentalId),
+    );
+
+final monthlyRevenueProvider = FutureProvider.autoDispose
+    .family<int, ({int year, int month})>((ref, period) {
+      return ref
+          .watch(rentalRepositoryProvider)
+          .monthlyRevenue(period.year, period.month);
+    });
+
 final rentalEditorProvider =
     AsyncNotifierProvider.autoDispose<RentalEditorController, void>(
       RentalEditorController.new,
+    );
+
+final returnControllerProvider =
+    AsyncNotifierProvider.autoDispose<ReturnController, void>(
+      ReturnController.new,
     );
 
 class RentalEditorController extends AutoDisposeAsyncNotifier<void> {
@@ -71,6 +89,34 @@ class RentalEditorController extends AutoDisposeAsyncNotifier<void> {
           );
       state = const AsyncData(null);
       return result;
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+}
+
+class ReturnController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<ReturnReceipt> recordReturn({
+    required String rentalId,
+    required List<ReturnLineInput> lines,
+    String? note,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final receipt = await ref
+          .read(rentalRepositoryProvider)
+          .recordReturn(rentalId, lines, note);
+      ref.invalidate(rentalDetailProvider(rentalId));
+      ref.invalidate(returnEventsProvider(rentalId));
+      ref.invalidate(activeRentalsProvider);
+      ref.invalidate(rentalsProvider);
+      ref.invalidate(monthlyRevenueProvider);
+      state = const AsyncData(null);
+      return receipt;
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;

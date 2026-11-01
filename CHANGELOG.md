@@ -21,3 +21,5 @@
 
 - Added Phase 1 Slice C rental creation, rental list/details, rental numbering, stock warnings, and calendar-day billing.
 - Fixed Slice C audit Value typing, stock-override exception coverage, billing estimate arithmetic, and editor form lints.
+- Added Phase 1 return recording, return summaries, per-event billing, and earned monthly revenue.
+- Fixed Slice D test import ambiguity, billing summary expectation, and Home smoke-test overflow.

@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/database.dart' as db;
 import '../../../core/utils/clock.dart';
+import '../../billing/rental_billing.dart';
 import '../domain/rental.dart';
 import '../domain/rental_repository.dart';
 
@@ -18,10 +19,15 @@ class RentalValidationException implements Exception {
 }
 
 class DriftRentalRepository implements RentalRepository {
-  DriftRentalRepository(this.database, {this.clock = const SystemClock()});
+  DriftRentalRepository(
+    this.database, {
+    this.clock = const SystemClock(),
+    this.localOffset,
+  });
 
   final db.AppDatabase database;
   final Clock clock;
+  final Duration? localOffset;
 
   @override
   Stream<List<RentalDetails>> watchActive({String query = ''}) =>
@@ -247,6 +253,249 @@ class DriftRentalRepository implements RentalRepository {
     return _availableStockInTransaction(materialId, material.totalStock);
   }
 
+  @override
+  Future<ReturnReceipt> recordReturn(
+    String rentalId,
+    List<ReturnLineInput> lines,
+    String? note,
+  ) async {
+    if (lines.isEmpty) {
+      throw const RentalValidationException(
+        'At least one return line is required.',
+      );
+    }
+    final lineIds = <String>{};
+    for (final line in lines) {
+      if (line.quantity < 1) {
+        throw const RentalValidationException(
+          'Each returned quantity must be at least 1.',
+        );
+      }
+      if (!lineIds.add(line.rentalItemId)) {
+        throw const RentalValidationException(
+          'A rental line may be returned only once per event.',
+        );
+      }
+    }
+
+    return database.transaction(() async {
+      final rentalRow = await (database.select(
+        database.rentals,
+      )..where((table) => table.id.equals(rentalId))).getSingleOrNull();
+      if (rentalRow == null) {
+        throw const RentalValidationException('Rental not found.');
+      }
+      if (rentalRow.status == RentalStatus.voided.name) {
+        throw const RentalValidationException(
+          'A voided rental cannot be returned.',
+        );
+      }
+      if (rentalRow.status == RentalStatus.returned.name) {
+        throw const RentalValidationException(
+          'A fully returned rental cannot be returned again.',
+        );
+      }
+
+      final itemRows = await (database.select(
+        database.rentalItems,
+      )..where((table) => table.rentalId.equals(rentalId))).get();
+      final itemsById = {for (final item in itemRows) item.id: item};
+      for (final line in lines) {
+        final item = itemsById[line.rentalItemId];
+        if (item == null) {
+          throw const RentalValidationException(
+            'Every return line must belong to the rental.',
+          );
+        }
+        final outstanding = item.quantity - item.quantityReturned;
+        if (line.quantity > outstanding) {
+          throw RentalValidationException(
+            'Cannot return more than the outstanding quantity for '
+            '${item.materialNameSnapshot}.',
+          );
+        }
+      }
+
+      final returnedAt = clock.now().toUtc();
+      final days = billableDays(
+        rentalRow.rentedAt,
+        returnedAt,
+        localOffset: localOffset ?? DateTime.now().timeZoneOffset,
+      );
+      final events = <ReturnEventRecord>[];
+      final oldQuantities = <Map<String, Object?>>[];
+      for (final line in lines) {
+        final item = itemsById[line.rentalItemId]!;
+        final amount = returnLineAmount(
+          quantity: line.quantity,
+          pricePerDaySnapshot: item.pricePerDaySnapshot,
+          days: days,
+        );
+        final event = ReturnEventRecord(
+          id: _uuidV4(),
+          rentalId: rentalId,
+          rentalItemId: item.id,
+          quantity: line.quantity,
+          returnedAt: returnedAt,
+          billableDays: days,
+          amount: amount,
+          pricePerDaySnapshot: item.pricePerDaySnapshot,
+          conditionNote: note == null || note.trim().isEmpty
+              ? null
+              : note.trim(),
+          createdAt: returnedAt,
+        );
+        events.add(event);
+        oldQuantities.add({
+          'rentalItemId': item.id,
+          'quantityReturned': item.quantityReturned,
+        });
+        await database
+            .into(database.returnEvents)
+            .insert(
+              db.ReturnEventsCompanion.insert(
+                id: event.id,
+                createdAt: returnedAt,
+                updatedAt: returnedAt,
+                rentalId: Value(event.rentalId),
+                rentalItemId: event.rentalItemId,
+                quantity: event.quantity,
+                returnedAt: event.returnedAt,
+                conditionNote: Value(event.conditionNote),
+                billableDays: event.billableDays,
+                amount: event.amount,
+                pricePerDaySnapshot: Value(event.pricePerDaySnapshot),
+              ),
+            );
+        await (database.update(
+          database.rentalItems,
+        )..where((table) => table.id.equals(item.id))).write(
+          db.RentalItemsCompanion(
+            quantityReturned: Value(item.quantityReturned + line.quantity),
+            updatedAt: Value(returnedAt),
+          ),
+        );
+      }
+
+      final updatedItems = await (database.select(
+        database.rentalItems,
+      )..where((table) => table.rentalId.equals(rentalId))).get();
+      final isFullyReturned = updatedItems.every(
+        (item) => item.quantityReturned >= item.quantity,
+      );
+      final status = isFullyReturned
+          ? RentalStatus.returned
+          : RentalStatus.partiallyReturned;
+      await (database.update(
+        database.rentals,
+      )..where((table) => table.id.equals(rentalId))).write(
+        db.RentalsCompanion(
+          status: Value(status.name),
+          updatedAt: Value(returnedAt),
+        ),
+      );
+
+      final total = events.fold<int>(0, (sum, event) => sum + event.amount);
+      await database
+          .into(database.auditLogs)
+          .insert(
+            db.AuditLogsCompanion.insert(
+              id: _uuidV4(),
+              createdAt: returnedAt,
+              updatedAt: returnedAt,
+              entityType: 'rental',
+              entityId: rentalId,
+              action: 'returnRecorded',
+              oldValue: Value(
+                jsonEncode({
+                  'status': rentalRow.status,
+                  'lines': oldQuantities,
+                }),
+              ),
+              newValue: Value(
+                jsonEncode({
+                  'rentalNumber': rentalRow.rentalNumber,
+                  'returnedAt': returnedAt.toIso8601String(),
+                  'note': note,
+                  'status': status.name,
+                  'lines': events
+                      .map(
+                        (event) => {
+                          'rentalItemId': event.rentalItemId,
+                          'quantity': event.quantity,
+                          'days': event.billableDays,
+                          'amount': event.amount,
+                        },
+                      )
+                      .toList(),
+                  'total': total,
+                }),
+              ),
+              at: returnedAt,
+              by: 'local-user',
+            ),
+          );
+
+      final customer = await (database.select(
+        database.customers,
+      )..where((table) => table.id.equals(rentalRow.customerId))).getSingle();
+      final rental = _rentalFromRow(
+        rentalRow,
+        status: status,
+        updatedAt: returnedAt,
+      );
+      return ReturnReceipt(
+        rental: rental,
+        customerName: customer.fullName,
+        events: events,
+        total: total,
+        status: status,
+        lines: updatedItems.map(_lineFromRow).toList(),
+        remainingOutstanding: updatedItems
+            .map(_lineFromRow)
+            .where((line) => line.outstandingQuantity > 0)
+            .toList(),
+      );
+    });
+  }
+
+  @override
+  Stream<List<ReturnEventRecord>> watchReturnEvents(String rentalId) {
+    return (database.select(database.returnEvents)
+          ..where((table) => table.rentalId.equals(rentalId))
+          ..orderBy([(table) => OrderingTerm.asc(table.returnedAt)]))
+        .watch()
+        .map((rows) => rows.map(_eventFromRow).toList());
+  }
+
+  @override
+  Future<List<ReturnEventRecord>> getReturnEvents(String rentalId) async {
+    final rows =
+        await (database.select(database.returnEvents)
+              ..where((table) => table.rentalId.equals(rentalId))
+              ..orderBy([(table) => OrderingTerm.asc(table.returnedAt)]))
+            .get();
+    return rows.map(_eventFromRow).toList();
+  }
+
+  @override
+  Future<int> monthlyRevenue(int year, int month) async {
+    final rentals = await database.select(database.rentals).get();
+    final validRentalIds = rentals
+        .where((rental) => rental.status != RentalStatus.voided.name)
+        .map((rental) => rental.id)
+        .toSet();
+    final events = await database.select(database.returnEvents).get();
+    return events
+        .where((event) {
+          final local = event.returnedAt.toLocal();
+          return validRentalIds.contains(event.rentalId) &&
+              local.year == year &&
+              local.month == month;
+        })
+        .fold<int>(0, (sum, event) => sum + event.amount);
+  }
+
   Future<int?> _availableStockInTransaction(
     String materialId,
     int? totalStock,
@@ -294,20 +543,26 @@ class DriftRentalRepository implements RentalRepository {
       database.rentalItems,
     )..where((table) => table.rentalId.equals(row.id))).get();
     return RentalDetails(
-      rental: RentalRecord(
-        id: row.id,
-        rentalNumber: row.rentalNumber,
-        customerId: row.customerId,
-        rentedAt: row.rentedAt.toUtc(),
-        status: RentalStatus.values.byName(row.status),
-        notes: row.notes,
-        createdAt: row.createdAt.toUtc(),
-        updatedAt: row.updatedAt.toUtc(),
-      ),
+      rental: _rentalFromRow(row),
       lines: items.map(_lineFromRow).toList(),
       customerName: customer.fullName,
     );
   }
+
+  static RentalRecord _rentalFromRow(
+    db.RentalRow row, {
+    RentalStatus? status,
+    DateTime? updatedAt,
+  }) => RentalRecord(
+    id: row.id,
+    rentalNumber: row.rentalNumber,
+    customerId: row.customerId,
+    rentedAt: row.rentedAt.toUtc(),
+    status: status ?? RentalStatus.values.byName(row.status),
+    notes: row.notes,
+    createdAt: row.createdAt.toUtc(),
+    updatedAt: updatedAt ?? row.updatedAt.toUtc(),
+  );
 
   static RentalLine _lineFromRow(db.RentalItemRow row) => RentalLine(
     id: row.id,
@@ -318,6 +573,20 @@ class DriftRentalRepository implements RentalRepository {
     quantity: row.quantity,
     quantityReturned: row.quantityReturned,
   );
+
+  static ReturnEventRecord _eventFromRow(db.ReturnEventRow row) =>
+      ReturnEventRecord(
+        id: row.id,
+        rentalId: row.rentalId,
+        rentalItemId: row.rentalItemId,
+        quantity: row.quantity,
+        returnedAt: row.returnedAt.toUtc(),
+        billableDays: row.billableDays,
+        amount: row.amount,
+        pricePerDaySnapshot: row.pricePerDaySnapshot,
+        conditionNote: row.conditionNote,
+        createdAt: row.createdAt.toUtc(),
+      );
 
   static String _formatNumber(int number) =>
       'R-${number.toString().padLeft(4, '0')}';

@@ -799,6 +799,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View customer'**
   String get viewCustomer;
+
+  /// No description provided for @thisMonthsRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'This month\'s revenue'**
+  String get thisMonthsRevenue;
+
+  /// No description provided for @earnedFromReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned from returns'**
+  String get earnedFromReturns;
+
+  /// No description provided for @returnAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get returnAction;
+
+  /// No description provided for @returnMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Return materials'**
+  String get returnMaterials;
+
+  /// No description provided for @returnAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Return all'**
+  String get returnAll;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @nowLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Now (locked)'**
+  String get nowLocked;
+
+  /// No description provided for @rentedQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Rented: {quantity}'**
+  String rentedQuantity(Object quantity);
+
+  /// No description provided for @alreadyReturnedQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Already returned: {quantity}'**
+  String alreadyReturnedQuantity(Object quantity);
+
+  /// No description provided for @outstandingQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding: {quantity}'**
+  String outstandingQuantity(Object quantity);
+
+  /// No description provided for @linePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days × {price} = {amount}'**
+  String linePreview(Object amount, Object days, Object price);
+
+  /// No description provided for @totalToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Total to pay'**
+  String get totalToPay;
+
+  /// No description provided for @confirmReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm return'**
+  String get confirmReturn;
+
+  /// No description provided for @returnDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Return date/time'**
+  String get returnDateTime;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @returnSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Return summary'**
+  String get returnSummary;
+
+  /// No description provided for @backToRental.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to rental'**
+  String get backToRental;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get backToHome;
+
+  /// No description provided for @returnHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Return history'**
+  String get returnHistory;
+
+  /// No description provided for @noReturnHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No returns recorded yet.'**
+  String get noReturnHistory;
+
+  /// No description provided for @earnedSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned so far'**
+  String get earnedSoFar;
+
+  /// No description provided for @outstandingEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding estimate'**
+  String get outstandingEstimate;
+
+  /// No description provided for @finalTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Final total'**
+  String get finalTotal;
+
+  /// No description provided for @totalForThisReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Total for this return'**
+  String get totalForThisReturn;
+
+  /// No description provided for @remainingOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining outstanding'**
+  String get remainingOutstanding;
+
+  /// No description provided for @runningEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Running estimate'**
+  String get runningEstimate;
+
+  /// No description provided for @returnNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Return note (optional)'**
+  String get returnNoteOptional;
+
+  /// No description provided for @returnValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one quantity to return.'**
+  String get returnValidation;
+
+  /// No description provided for @returnSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not record the return.'**
+  String get returnSaveError;
+
+  /// No description provided for @returnDateTimeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Return date/time: {value}'**
+  String returnDateTimeValue(Object value);
+
+  /// No description provided for @returnHistoryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {material} · {quantity} units · {days} days · {amount}'**
+  String returnHistoryLine(
+    Object amount,
+    Object date,
+    Object days,
+    Object material,
+    Object quantity,
+  );
+
+  /// No description provided for @summaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} returned · {days} days · {price} · {amount}'**
+  String summaryLine(Object amount, Object days, Object price, Object quantity);
 }
 
 class _AppLocalizationsDelegate

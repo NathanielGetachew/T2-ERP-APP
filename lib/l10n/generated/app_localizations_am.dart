@@ -359,4 +359,125 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get viewCustomer => 'ደንበኛን ይመልከቱ';
+
+  @override
+  String get thisMonthsRevenue => 'የዚህ ወር ገቢ';
+
+  @override
+  String get earnedFromReturns => 'ከተመለሱ እቃዎች የተገኘ';
+
+  @override
+  String get returnAction => 'መመለስ';
+
+  @override
+  String get returnMaterials => 'እቃዎችን መመለስ';
+
+  @override
+  String get returnAll => 'ሁሉንም መልስ';
+
+  @override
+  String get clear => 'አጽዳ';
+
+  @override
+  String get nowLocked => 'አሁን (የተቆለፈ)';
+
+  @override
+  String rentedQuantity(Object quantity) {
+    return 'የተከራየ ብዛት: $quantity';
+  }
+
+  @override
+  String alreadyReturnedQuantity(Object quantity) {
+    return 'ቀድሞ የተመለሰ: $quantity';
+  }
+
+  @override
+  String outstandingQuantity(Object quantity) {
+    return 'ያልተመለሰ: $quantity';
+  }
+
+  @override
+  String linePreview(Object amount, Object days, Object price) {
+    return '$days ቀናት × $price = $amount';
+  }
+
+  @override
+  String get totalToPay => 'ጠቅላላ የሚከፈል';
+
+  @override
+  String get confirmReturn => 'መመለሱን አረጋግጥ';
+
+  @override
+  String get returnDateTime => 'የመመለሻ ቀን እና ሰዓት';
+
+  @override
+  String get confirm => 'አረጋግጥ';
+
+  @override
+  String get returnSummary => 'የመመለሻ ማጠቃለያ';
+
+  @override
+  String get backToRental => 'ወደ ኪራዩ ተመለስ';
+
+  @override
+  String get backToHome => 'ወደ መነሻ ተመለስ';
+
+  @override
+  String get returnHistory => 'የመመለሻ ታሪክ';
+
+  @override
+  String get noReturnHistory => 'እስካሁን የመመለሻ ታሪክ የለም።';
+
+  @override
+  String get earnedSoFar => 'እስካሁን የተገኘ';
+
+  @override
+  String get outstandingEstimate => 'ያልተመለሰ ግምት';
+
+  @override
+  String get finalTotal => 'የመጨረሻ ጠቅላላ';
+
+  @override
+  String get totalForThisReturn => 'ለዚህ መመለሻ ጠቅላላ';
+
+  @override
+  String get remainingOutstanding => 'የቀረ ያልተመለሰ';
+
+  @override
+  String get runningEstimate => 'የአሁኑ ግምት';
+
+  @override
+  String get returnNoteOptional => 'የመመለሻ ማስታወሻ (አማራጭ)';
+
+  @override
+  String get returnValidation => 'ቢያንስ አንድ የመመለሻ ብዛት ይምረጡ።';
+
+  @override
+  String get returnSaveError => 'መመለሱን መመዝገብ አልተቻለም።';
+
+  @override
+  String returnDateTimeValue(Object value) {
+    return 'የመመለሻ ቀን እና ሰዓት: $value';
+  }
+
+  @override
+  String returnHistoryLine(
+    Object amount,
+    Object date,
+    Object days,
+    Object material,
+    Object quantity,
+  ) {
+    return '$date · $material · $quantity ክፍሎች · $days ቀናት · $amount';
+  }
+
+  @override
+  String summaryLine(
+    Object amount,
+    Object days,
+    Object price,
+    Object quantity,
+  ) {
+    return '$quantity ተመልሷል · $days ቀናት · $price · $amount';
+  }
 }

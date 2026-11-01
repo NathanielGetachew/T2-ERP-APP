@@ -57,6 +57,24 @@ class FakeRentalRepository implements RentalRepository {
   @override
   Future<int?> availableStock(String materialId) async => null;
 
+  @override
+  Future<ReturnReceipt> recordReturn(
+    String rentalId,
+    List<ReturnLineInput> lines,
+    String? note,
+  ) => throw UnimplementedError();
+
+  @override
+  Stream<List<ReturnEventRecord>> watchReturnEvents(String rentalId) async* {
+    yield const [];
+  }
+
+  @override
+  Future<List<ReturnEventRecord>> getReturnEvents(String rentalId) async => [];
+
+  @override
+  Future<int> monthlyRevenue(int year, int month) async => 0;
+
   List<RentalDetails> _filter(String query, RentalStatus? status) {
     final normalized = query.toLowerCase().trim();
     return _rentals.where((item) {

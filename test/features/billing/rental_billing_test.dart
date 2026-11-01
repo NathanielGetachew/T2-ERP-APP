@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:t2_rental/features/billing/rental_billing.dart';
+import 'package:t2_rental/features/rentals/domain/rental.dart';
 
 void main() {
   const offset = Duration(hours: 3);
@@ -103,6 +104,82 @@ void main() {
         localOffset: offset,
       ),
       30_000,
+    );
+  });
+
+  test('calculates return amounts for a full three-day return', () {
+    expect(
+      returnLineAmount(quantity: 10, pricePerDaySnapshot: 2500, days: 3),
+      75_000,
+    );
+  });
+
+  test('calculates partial returns on different dates', () {
+    final first = returnLineAmount(
+      quantity: 4,
+      pricePerDaySnapshot: 2500,
+      days: 2,
+    );
+    final second = returnLineAmount(
+      quantity: 6,
+      pricePerDaySnapshot: 2500,
+      days: 5,
+    );
+    expect(first + second, 95_000);
+  });
+
+  test('summarizes earned and outstanding estimates separately', () {
+    final rental = RentalRecord(
+      id: 'rental',
+      rentalNumber: 1,
+      customerId: 'customer',
+      rentedAt: DateTime.utc(2026, 1, 1),
+      status: RentalStatus.partiallyReturned,
+      notes: null,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    final line = RentalLine(
+      id: 'line',
+      rentalId: 'rental',
+      materialId: 'material',
+      materialNameSnapshot: 'Panel',
+      pricePerDaySnapshot: 2500,
+      quantity: 10,
+      quantityReturned: 4,
+    );
+    final event = ReturnEventRecord(
+      id: 'event',
+      rentalId: 'rental',
+      rentalItemId: 'line',
+      quantity: 4,
+      returnedAt: DateTime.utc(2026, 1, 2),
+      billableDays: 2,
+      amount: 20_000,
+      pricePerDaySnapshot: 2500,
+      conditionNote: null,
+      createdAt: DateTime.utc(2026, 1, 2),
+    );
+    final summary = rentalSummary(
+      rental: rental,
+      lines: [line],
+      returnEvents: [event],
+      asOfUtc: DateTime.utc(2026, 1, 5),
+      localOffset: offset,
+    );
+    expect(summary.earnedTotal, 20_000);
+    expect(summary.outstandingEstimate, 75_000);
+    expect(summary.grandTotalEstimate, 95_000);
+  });
+
+  test('rejects zero and negative return quantities', () {
+    expect(
+      () => returnLineAmount(quantity: 0, pricePerDaySnapshot: 2500, days: 1),
+      throwsArgumentError,
+    );
+    expect(
+      () => returnLineAmount(quantity: -1, pricePerDaySnapshot: 2500, days: 1),
+      throwsArgumentError,
     );
   });
 }

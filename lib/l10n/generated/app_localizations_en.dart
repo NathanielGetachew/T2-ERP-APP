@@ -363,4 +363,125 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewCustomer => 'View customer';
+
+  @override
+  String get thisMonthsRevenue => 'This month\'s revenue';
+
+  @override
+  String get earnedFromReturns => 'Earned from returns';
+
+  @override
+  String get returnAction => 'Return';
+
+  @override
+  String get returnMaterials => 'Return materials';
+
+  @override
+  String get returnAll => 'Return all';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get nowLocked => 'Now (locked)';
+
+  @override
+  String rentedQuantity(Object quantity) {
+    return 'Rented: $quantity';
+  }
+
+  @override
+  String alreadyReturnedQuantity(Object quantity) {
+    return 'Already returned: $quantity';
+  }
+
+  @override
+  String outstandingQuantity(Object quantity) {
+    return 'Outstanding: $quantity';
+  }
+
+  @override
+  String linePreview(Object amount, Object days, Object price) {
+    return '$days days × $price = $amount';
+  }
+
+  @override
+  String get totalToPay => 'Total to pay';
+
+  @override
+  String get confirmReturn => 'Confirm return';
+
+  @override
+  String get returnDateTime => 'Return date/time';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get returnSummary => 'Return summary';
+
+  @override
+  String get backToRental => 'Back to rental';
+
+  @override
+  String get backToHome => 'Back to Home';
+
+  @override
+  String get returnHistory => 'Return history';
+
+  @override
+  String get noReturnHistory => 'No returns recorded yet.';
+
+  @override
+  String get earnedSoFar => 'Earned so far';
+
+  @override
+  String get outstandingEstimate => 'Outstanding estimate';
+
+  @override
+  String get finalTotal => 'Final total';
+
+  @override
+  String get totalForThisReturn => 'Total for this return';
+
+  @override
+  String get remainingOutstanding => 'Remaining outstanding';
+
+  @override
+  String get runningEstimate => 'Running estimate';
+
+  @override
+  String get returnNoteOptional => 'Return note (optional)';
+
+  @override
+  String get returnValidation => 'Select at least one quantity to return.';
+
+  @override
+  String get returnSaveError => 'Could not record the return.';
+
+  @override
+  String returnDateTimeValue(Object value) {
+    return 'Return date/time: $value';
+  }
+
+  @override
+  String returnHistoryLine(
+    Object amount,
+    Object date,
+    Object days,
+    Object material,
+    Object quantity,
+  ) {
+    return '$date · $material · $quantity units · $days days · $amount';
+  }
+
+  @override
+  String summaryLine(
+    Object amount,
+    Object days,
+    Object price,
+    Object quantity,
+  ) {
+    return '$quantity returned · $days days · $price · $amount';
+  }
 }

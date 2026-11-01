@@ -8,11 +8,13 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/services/image_capture_service.dart';
 import '../../../core/services/image_storage_service.dart';
 import '../../../core/widgets/safe_back_button.dart';
+import '../../../core/utils/money.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/customer_providers.dart';
 import '../domain/customer.dart';
 import '../domain/customer_repository.dart';
 import '../../rentals/application/rental_providers.dart';
+import '../../rentals/domain/rental.dart';
 import '../../rentals/domain/rental_number.dart';
 
 class CustomerDetailScreen extends ConsumerWidget {
@@ -151,14 +153,8 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
               : Column(
                   children: rentals
                       .map(
-                        (details) => ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            formatRentalNumber(details.rental.rentalNumber),
-                          ),
-                          subtitle: Text(
-                            details.rental.rentedAt.toLocal().toString(),
-                          ),
+                        (details) => _CustomerRentalHistoryTile(
+                          details: details,
                           onTap: () =>
                               context.push('/rentals/${details.rental.id}'),
                         ),
@@ -271,6 +267,34 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
             .showSnackBar(SnackBar(content: Text(l10n.photoReplacementError)));
       }
     }
+  }
+}
+
+class _CustomerRentalHistoryTile extends ConsumerWidget {
+  const _CustomerRentalHistoryTile({
+    required this.details,
+    required this.onTap,
+  });
+
+  final RentalDetails details;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final events = details.rental.status == RentalStatus.returned
+        ? ref.watch(returnEventsProvider(details.rental.id)).valueOrNull
+        : null;
+    final total = events?.fold<int>(0, (sum, event) => sum + event.amount);
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(formatRentalNumber(details.rental.rentalNumber)),
+      subtitle: Text(details.rental.rentedAt.toLocal().toString()),
+      trailing: total == null
+          ? null
+          : Text('${l10n.finalTotal}: ${formatEtb(total)}'),
+      onTap: onTap,
+    );
   }
 }
 

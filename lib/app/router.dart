@@ -11,6 +11,9 @@ import '../features/materials/presentation/materials_screen.dart';
 import '../features/rentals/presentation/rental_detail_screen.dart';
 import '../features/rentals/presentation/rental_editor_screen.dart';
 import '../features/rentals/presentation/rentals_screen.dart';
+import '../features/rentals/presentation/return_screen.dart';
+import '../features/rentals/presentation/return_summary_screen.dart';
+import '../features/rentals/domain/rental.dart';
 import '../features/settings/presentation/settings_screen.dart';
 
 GoRouter createAppRouter() => GoRouter(
@@ -73,6 +76,16 @@ GoRouter createAppRouter() => GoRouter(
       path: '/rentals/:id',
       builder: (context, state) =>
           RentalDetailScreen(rentalId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/rentals/:id/return',
+      builder: (context, state) =>
+          ReturnScreen(rentalId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/rentals/:id/return-summary',
+      builder: (context, state) =>
+          ReturnSummaryScreen(receipt: state.extra! as ReturnReceipt),
     ),
   ],
 );

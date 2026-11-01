@@ -32,4 +32,16 @@ abstract interface class RentalRepository {
   });
 
   Future<int?> availableStock(String materialId);
+
+  Future<ReturnReceipt> recordReturn(
+    String rentalId,
+    List<ReturnLineInput> lines,
+    String? note,
+  );
+
+  Stream<List<ReturnEventRecord>> watchReturnEvents(String rentalId);
+
+  Future<List<ReturnEventRecord>> getReturnEvents(String rentalId);
+
+  Future<int> monthlyRevenue(int year, int month);
 }

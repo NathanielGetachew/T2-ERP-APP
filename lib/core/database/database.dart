@@ -73,16 +73,20 @@ class RentalItems extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('ReturnEventRow')
 class ReturnEvents extends Table {
   TextColumn get id => text()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get rentalId => text().withDefault(const Constant(''))();
   TextColumn get rentalItemId => text()();
   IntColumn get quantity => integer()();
   DateTimeColumn get returnedAt => dateTime()();
   TextColumn get conditionNote => text().nullable()();
-  IntColumn get days => integer()();
+  IntColumn get billableDays => integer()();
   IntColumn get amount => integer()();
+  IntColumn get pricePerDaySnapshot =>
+      integer().withDefault(const Constant(0))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -121,7 +125,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -136,6 +140,23 @@ class AppDatabase extends _$AppDatabase {
                 ..where((table) => table.id.equals(existing[index].id)))
               .write(RentalsCompanion(rentalNumber: Value(index + 1)));
         }
+      }
+      if (from < 3) {
+        await m.renameColumn(returnEvents, 'days', returnEvents.billableDays);
+        await m.addColumn(returnEvents, returnEvents.rentalId);
+        await m.addColumn(returnEvents, returnEvents.pricePerDaySnapshot);
+        await customStatement(
+          'UPDATE return_events '
+          'SET rental_id = (SELECT rental_id FROM rental_items '
+          'WHERE rental_items.id = return_events.rental_item_id) '
+          'WHERE rental_id = \'\'',
+        );
+        await customStatement(
+          'UPDATE return_events SET price_per_day_snapshot = '
+          '(SELECT price_per_day_snapshot FROM rental_items '
+          'WHERE rental_items.id = return_events.rental_item_id) '
+          'WHERE price_per_day_snapshot = 0',
+        );
       }
     },
   );

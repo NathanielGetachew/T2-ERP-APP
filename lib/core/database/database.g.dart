@@ -2557,7 +2557,7 @@ class RentalItemsCompanion extends UpdateCompanion<RentalItemRow> {
 }
 
 class $ReturnEventsTable extends ReturnEvents
-    with TableInfo<$ReturnEventsTable, ReturnEvent> {
+    with TableInfo<$ReturnEventsTable, ReturnEventRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2592,6 +2592,18 @@ class $ReturnEventsTable extends ReturnEvents
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rentalIdMeta = const VerificationMeta(
+    'rentalId',
+  );
+  @override
+  late final GeneratedColumn<String> rentalId = GeneratedColumn<String>(
+    'rental_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _rentalItemIdMeta = const VerificationMeta(
     'rentalItemId',
@@ -2637,10 +2649,12 @@ class $ReturnEventsTable extends ReturnEvents
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _daysMeta = const VerificationMeta('days');
+  static const VerificationMeta _billableDaysMeta = const VerificationMeta(
+    'billableDays',
+  );
   @override
-  late final GeneratedColumn<int> days = GeneratedColumn<int>(
-    'days',
+  late final GeneratedColumn<int> billableDays = GeneratedColumn<int>(
+    'billable_days',
     aliasedName,
     false,
     type: DriftSqlType.int,
@@ -2655,17 +2669,30 @@ class $ReturnEventsTable extends ReturnEvents
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pricePerDaySnapshotMeta =
+      const VerificationMeta('pricePerDaySnapshot');
+  @override
+  late final GeneratedColumn<int> pricePerDaySnapshot = GeneratedColumn<int>(
+    'price_per_day_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     createdAt,
     updatedAt,
+    rentalId,
     rentalItemId,
     quantity,
     returnedAt,
     conditionNote,
-    days,
+    billableDays,
     amount,
+    pricePerDaySnapshot,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2674,7 +2701,7 @@ class $ReturnEventsTable extends ReturnEvents
   static const String $name = 'return_events';
   @override
   VerificationContext validateIntegrity(
-    Insertable<ReturnEvent> instance, {
+    Insertable<ReturnEventRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -2699,6 +2726,12 @@ class $ReturnEventsTable extends ReturnEvents
       );
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('rental_id')) {
+      context.handle(
+        _rentalIdMeta,
+        rentalId.isAcceptableOrUnknown(data['rental_id']!, _rentalIdMeta),
+      );
     }
     if (data.containsKey('rental_item_id')) {
       context.handle(
@@ -2736,13 +2769,16 @@ class $ReturnEventsTable extends ReturnEvents
         ),
       );
     }
-    if (data.containsKey('days')) {
+    if (data.containsKey('billable_days')) {
       context.handle(
-        _daysMeta,
-        days.isAcceptableOrUnknown(data['days']!, _daysMeta),
+        _billableDaysMeta,
+        billableDays.isAcceptableOrUnknown(
+          data['billable_days']!,
+          _billableDaysMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_daysMeta);
+      context.missing(_billableDaysMeta);
     }
     if (data.containsKey('amount')) {
       context.handle(
@@ -2752,15 +2788,24 @@ class $ReturnEventsTable extends ReturnEvents
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
+    if (data.containsKey('price_per_day_snapshot')) {
+      context.handle(
+        _pricePerDaySnapshotMeta,
+        pricePerDaySnapshot.isAcceptableOrUnknown(
+          data['price_per_day_snapshot']!,
+          _pricePerDaySnapshotMeta,
+        ),
+      );
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ReturnEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ReturnEventRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ReturnEvent(
+    return ReturnEventRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -2772,6 +2817,10 @@ class $ReturnEventsTable extends ReturnEvents
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
+      )!,
+      rentalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rental_id'],
       )!,
       rentalItemId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -2789,13 +2838,17 @@ class $ReturnEventsTable extends ReturnEvents
         DriftSqlType.string,
         data['${effectivePrefix}condition_note'],
       ),
-      days: attachedDatabase.typeMapping.read(
+      billableDays: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}days'],
+        data['${effectivePrefix}billable_days'],
       )!,
       amount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}amount'],
+      )!,
+      pricePerDaySnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}price_per_day_snapshot'],
       )!,
     );
   }
@@ -2806,26 +2859,30 @@ class $ReturnEventsTable extends ReturnEvents
   }
 }
 
-class ReturnEvent extends DataClass implements Insertable<ReturnEvent> {
+class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
   final String id;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String rentalId;
   final String rentalItemId;
   final int quantity;
   final DateTime returnedAt;
   final String? conditionNote;
-  final int days;
+  final int billableDays;
   final int amount;
-  const ReturnEvent({
+  final int pricePerDaySnapshot;
+  const ReturnEventRow({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
+    required this.rentalId,
     required this.rentalItemId,
     required this.quantity,
     required this.returnedAt,
     this.conditionNote,
-    required this.days,
+    required this.billableDays,
     required this.amount,
+    required this.pricePerDaySnapshot,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2833,14 +2890,16 @@ class ReturnEvent extends DataClass implements Insertable<ReturnEvent> {
     map['id'] = Variable<String>(id);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['rental_id'] = Variable<String>(rentalId);
     map['rental_item_id'] = Variable<String>(rentalItemId);
     map['quantity'] = Variable<int>(quantity);
     map['returned_at'] = Variable<DateTime>(returnedAt);
     if (!nullToAbsent || conditionNote != null) {
       map['condition_note'] = Variable<String>(conditionNote);
     }
-    map['days'] = Variable<int>(days);
+    map['billable_days'] = Variable<int>(billableDays);
     map['amount'] = Variable<int>(amount);
+    map['price_per_day_snapshot'] = Variable<int>(pricePerDaySnapshot);
     return map;
   }
 
@@ -2849,32 +2908,38 @@ class ReturnEvent extends DataClass implements Insertable<ReturnEvent> {
       id: Value(id),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      rentalId: Value(rentalId),
       rentalItemId: Value(rentalItemId),
       quantity: Value(quantity),
       returnedAt: Value(returnedAt),
       conditionNote: conditionNote == null && nullToAbsent
           ? const Value.absent()
           : Value(conditionNote),
-      days: Value(days),
+      billableDays: Value(billableDays),
       amount: Value(amount),
+      pricePerDaySnapshot: Value(pricePerDaySnapshot),
     );
   }
 
-  factory ReturnEvent.fromJson(
+  factory ReturnEventRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ReturnEvent(
+    return ReturnEventRow(
       id: serializer.fromJson<String>(json['id']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      rentalId: serializer.fromJson<String>(json['rentalId']),
       rentalItemId: serializer.fromJson<String>(json['rentalItemId']),
       quantity: serializer.fromJson<int>(json['quantity']),
       returnedAt: serializer.fromJson<DateTime>(json['returnedAt']),
       conditionNote: serializer.fromJson<String?>(json['conditionNote']),
-      days: serializer.fromJson<int>(json['days']),
+      billableDays: serializer.fromJson<int>(json['billableDays']),
       amount: serializer.fromJson<int>(json['amount']),
+      pricePerDaySnapshot: serializer.fromJson<int>(
+        json['pricePerDaySnapshot'],
+      ),
     );
   }
   @override
@@ -2884,43 +2949,50 @@ class ReturnEvent extends DataClass implements Insertable<ReturnEvent> {
       'id': serializer.toJson<String>(id),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'rentalId': serializer.toJson<String>(rentalId),
       'rentalItemId': serializer.toJson<String>(rentalItemId),
       'quantity': serializer.toJson<int>(quantity),
       'returnedAt': serializer.toJson<DateTime>(returnedAt),
       'conditionNote': serializer.toJson<String?>(conditionNote),
-      'days': serializer.toJson<int>(days),
+      'billableDays': serializer.toJson<int>(billableDays),
       'amount': serializer.toJson<int>(amount),
+      'pricePerDaySnapshot': serializer.toJson<int>(pricePerDaySnapshot),
     };
   }
 
-  ReturnEvent copyWith({
+  ReturnEventRow copyWith({
     String? id,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? rentalId,
     String? rentalItemId,
     int? quantity,
     DateTime? returnedAt,
     Value<String?> conditionNote = const Value.absent(),
-    int? days,
+    int? billableDays,
     int? amount,
-  }) => ReturnEvent(
+    int? pricePerDaySnapshot,
+  }) => ReturnEventRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    rentalId: rentalId ?? this.rentalId,
     rentalItemId: rentalItemId ?? this.rentalItemId,
     quantity: quantity ?? this.quantity,
     returnedAt: returnedAt ?? this.returnedAt,
     conditionNote: conditionNote.present
         ? conditionNote.value
         : this.conditionNote,
-    days: days ?? this.days,
+    billableDays: billableDays ?? this.billableDays,
     amount: amount ?? this.amount,
+    pricePerDaySnapshot: pricePerDaySnapshot ?? this.pricePerDaySnapshot,
   );
-  ReturnEvent copyWithCompanion(ReturnEventsCompanion data) {
-    return ReturnEvent(
+  ReturnEventRow copyWithCompanion(ReturnEventsCompanion data) {
+    return ReturnEventRow(
       id: data.id.present ? data.id.value : this.id,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rentalId: data.rentalId.present ? data.rentalId.value : this.rentalId,
       rentalItemId: data.rentalItemId.present
           ? data.rentalItemId.value
           : this.rentalItemId,
@@ -2931,23 +3003,30 @@ class ReturnEvent extends DataClass implements Insertable<ReturnEvent> {
       conditionNote: data.conditionNote.present
           ? data.conditionNote.value
           : this.conditionNote,
-      days: data.days.present ? data.days.value : this.days,
+      billableDays: data.billableDays.present
+          ? data.billableDays.value
+          : this.billableDays,
       amount: data.amount.present ? data.amount.value : this.amount,
+      pricePerDaySnapshot: data.pricePerDaySnapshot.present
+          ? data.pricePerDaySnapshot.value
+          : this.pricePerDaySnapshot,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('ReturnEvent(')
+    return (StringBuffer('ReturnEventRow(')
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('rentalId: $rentalId, ')
           ..write('rentalItemId: $rentalItemId, ')
           ..write('quantity: $quantity, ')
           ..write('returnedAt: $returnedAt, ')
           ..write('conditionNote: $conditionNote, ')
-          ..write('days: $days, ')
-          ..write('amount: $amount')
+          ..write('billableDays: $billableDays, ')
+          ..write('amount: $amount, ')
+          ..write('pricePerDaySnapshot: $pricePerDaySnapshot')
           ..write(')'))
         .toString();
   }
@@ -2957,61 +3036,71 @@ class ReturnEvent extends DataClass implements Insertable<ReturnEvent> {
     id,
     createdAt,
     updatedAt,
+    rentalId,
     rentalItemId,
     quantity,
     returnedAt,
     conditionNote,
-    days,
+    billableDays,
     amount,
+    pricePerDaySnapshot,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ReturnEvent &&
+      (other is ReturnEventRow &&
           other.id == this.id &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
+          other.rentalId == this.rentalId &&
           other.rentalItemId == this.rentalItemId &&
           other.quantity == this.quantity &&
           other.returnedAt == this.returnedAt &&
           other.conditionNote == this.conditionNote &&
-          other.days == this.days &&
-          other.amount == this.amount);
+          other.billableDays == this.billableDays &&
+          other.amount == this.amount &&
+          other.pricePerDaySnapshot == this.pricePerDaySnapshot);
 }
 
-class ReturnEventsCompanion extends UpdateCompanion<ReturnEvent> {
+class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
   final Value<String> id;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<String> rentalId;
   final Value<String> rentalItemId;
   final Value<int> quantity;
   final Value<DateTime> returnedAt;
   final Value<String?> conditionNote;
-  final Value<int> days;
+  final Value<int> billableDays;
   final Value<int> amount;
+  final Value<int> pricePerDaySnapshot;
   final Value<int> rowid;
   const ReturnEventsCompanion({
     this.id = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.rentalId = const Value.absent(),
     this.rentalItemId = const Value.absent(),
     this.quantity = const Value.absent(),
     this.returnedAt = const Value.absent(),
     this.conditionNote = const Value.absent(),
-    this.days = const Value.absent(),
+    this.billableDays = const Value.absent(),
     this.amount = const Value.absent(),
+    this.pricePerDaySnapshot = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReturnEventsCompanion.insert({
     required String id,
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.rentalId = const Value.absent(),
     required String rentalItemId,
     required int quantity,
     required DateTime returnedAt,
     this.conditionNote = const Value.absent(),
-    required int days,
+    required int billableDays,
     required int amount,
+    this.pricePerDaySnapshot = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -3019,30 +3108,35 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEvent> {
        rentalItemId = Value(rentalItemId),
        quantity = Value(quantity),
        returnedAt = Value(returnedAt),
-       days = Value(days),
+       billableDays = Value(billableDays),
        amount = Value(amount);
-  static Insertable<ReturnEvent> custom({
+  static Insertable<ReturnEventRow> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? rentalId,
     Expression<String>? rentalItemId,
     Expression<int>? quantity,
     Expression<DateTime>? returnedAt,
     Expression<String>? conditionNote,
-    Expression<int>? days,
+    Expression<int>? billableDays,
     Expression<int>? amount,
+    Expression<int>? pricePerDaySnapshot,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (rentalId != null) 'rental_id': rentalId,
       if (rentalItemId != null) 'rental_item_id': rentalItemId,
       if (quantity != null) 'quantity': quantity,
       if (returnedAt != null) 'returned_at': returnedAt,
       if (conditionNote != null) 'condition_note': conditionNote,
-      if (days != null) 'days': days,
+      if (billableDays != null) 'billable_days': billableDays,
       if (amount != null) 'amount': amount,
+      if (pricePerDaySnapshot != null)
+        'price_per_day_snapshot': pricePerDaySnapshot,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3051,24 +3145,28 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEvent> {
     Value<String>? id,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<String>? rentalId,
     Value<String>? rentalItemId,
     Value<int>? quantity,
     Value<DateTime>? returnedAt,
     Value<String?>? conditionNote,
-    Value<int>? days,
+    Value<int>? billableDays,
     Value<int>? amount,
+    Value<int>? pricePerDaySnapshot,
     Value<int>? rowid,
   }) {
     return ReturnEventsCompanion(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      rentalId: rentalId ?? this.rentalId,
       rentalItemId: rentalItemId ?? this.rentalItemId,
       quantity: quantity ?? this.quantity,
       returnedAt: returnedAt ?? this.returnedAt,
       conditionNote: conditionNote ?? this.conditionNote,
-      days: days ?? this.days,
+      billableDays: billableDays ?? this.billableDays,
       amount: amount ?? this.amount,
+      pricePerDaySnapshot: pricePerDaySnapshot ?? this.pricePerDaySnapshot,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3085,6 +3183,9 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEvent> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (rentalId.present) {
+      map['rental_id'] = Variable<String>(rentalId.value);
+    }
     if (rentalItemId.present) {
       map['rental_item_id'] = Variable<String>(rentalItemId.value);
     }
@@ -3097,11 +3198,14 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEvent> {
     if (conditionNote.present) {
       map['condition_note'] = Variable<String>(conditionNote.value);
     }
-    if (days.present) {
-      map['days'] = Variable<int>(days.value);
+    if (billableDays.present) {
+      map['billable_days'] = Variable<int>(billableDays.value);
     }
     if (amount.present) {
       map['amount'] = Variable<int>(amount.value);
+    }
+    if (pricePerDaySnapshot.present) {
+      map['price_per_day_snapshot'] = Variable<int>(pricePerDaySnapshot.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3115,12 +3219,14 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEvent> {
           ..write('id: $id, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('rentalId: $rentalId, ')
           ..write('rentalItemId: $rentalItemId, ')
           ..write('quantity: $quantity, ')
           ..write('returnedAt: $returnedAt, ')
           ..write('conditionNote: $conditionNote, ')
-          ..write('days: $days, ')
+          ..write('billableDays: $billableDays, ')
           ..write('amount: $amount, ')
+          ..write('pricePerDaySnapshot: $pricePerDaySnapshot, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4972,12 +5078,14 @@ typedef $$ReturnEventsTableCreateCompanionBuilder =
       required String id,
       required DateTime createdAt,
       required DateTime updatedAt,
+      Value<String> rentalId,
       required String rentalItemId,
       required int quantity,
       required DateTime returnedAt,
       Value<String?> conditionNote,
-      required int days,
+      required int billableDays,
       required int amount,
+      Value<int> pricePerDaySnapshot,
       Value<int> rowid,
     });
 typedef $$ReturnEventsTableUpdateCompanionBuilder =
@@ -4985,12 +5093,14 @@ typedef $$ReturnEventsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<String> rentalId,
       Value<String> rentalItemId,
       Value<int> quantity,
       Value<DateTime> returnedAt,
       Value<String?> conditionNote,
-      Value<int> days,
+      Value<int> billableDays,
       Value<int> amount,
+      Value<int> pricePerDaySnapshot,
       Value<int> rowid,
     });
 
@@ -5018,6 +5128,11 @@ class $$ReturnEventsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get rentalId => $composableBuilder(
+    column: $table.rentalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get rentalItemId => $composableBuilder(
     column: $table.rentalItemId,
     builder: (column) => ColumnFilters(column),
@@ -5038,13 +5153,18 @@ class $$ReturnEventsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get days => $composableBuilder(
-    column: $table.days,
+  ColumnFilters<int> get billableDays => $composableBuilder(
+    column: $table.billableDays,
     builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<int> get amount => $composableBuilder(
     column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pricePerDaySnapshot => $composableBuilder(
+    column: $table.pricePerDaySnapshot,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5073,6 +5193,11 @@ class $$ReturnEventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get rentalId => $composableBuilder(
+    column: $table.rentalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get rentalItemId => $composableBuilder(
     column: $table.rentalItemId,
     builder: (column) => ColumnOrderings(column),
@@ -5093,13 +5218,18 @@ class $$ReturnEventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get days => $composableBuilder(
-    column: $table.days,
+  ColumnOrderings<int> get billableDays => $composableBuilder(
+    column: $table.billableDays,
     builder: (column) => ColumnOrderings(column),
   );
 
   ColumnOrderings<int> get amount => $composableBuilder(
     column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pricePerDaySnapshot => $composableBuilder(
+    column: $table.pricePerDaySnapshot,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -5122,6 +5252,9 @@ class $$ReturnEventsTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumn<String> get rentalId =>
+      $composableBuilder(column: $table.rentalId, builder: (column) => column);
+
   GeneratedColumn<String> get rentalItemId => $composableBuilder(
     column: $table.rentalItemId,
     builder: (column) => column,
@@ -5140,11 +5273,18 @@ class $$ReturnEventsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get days =>
-      $composableBuilder(column: $table.days, builder: (column) => column);
+  GeneratedColumn<int> get billableDays => $composableBuilder(
+    column: $table.billableDays,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get pricePerDaySnapshot => $composableBuilder(
+    column: $table.pricePerDaySnapshot,
+    builder: (column) => column,
+  );
 }
 
 class $$ReturnEventsTableTableManager
@@ -5152,17 +5292,17 @@ class $$ReturnEventsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $ReturnEventsTable,
-          ReturnEvent,
+          ReturnEventRow,
           $$ReturnEventsTableFilterComposer,
           $$ReturnEventsTableOrderingComposer,
           $$ReturnEventsTableAnnotationComposer,
           $$ReturnEventsTableCreateCompanionBuilder,
           $$ReturnEventsTableUpdateCompanionBuilder,
           (
-            ReturnEvent,
-            BaseReferences<_$AppDatabase, $ReturnEventsTable, ReturnEvent>,
+            ReturnEventRow,
+            BaseReferences<_$AppDatabase, $ReturnEventsTable, ReturnEventRow>,
           ),
-          ReturnEvent,
+          ReturnEventRow,
           PrefetchHooks Function()
         > {
   $$ReturnEventsTableTableManager(_$AppDatabase db, $ReturnEventsTable table)
@@ -5181,23 +5321,27 @@ class $$ReturnEventsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> rentalId = const Value.absent(),
                 Value<String> rentalItemId = const Value.absent(),
                 Value<int> quantity = const Value.absent(),
                 Value<DateTime> returnedAt = const Value.absent(),
                 Value<String?> conditionNote = const Value.absent(),
-                Value<int> days = const Value.absent(),
+                Value<int> billableDays = const Value.absent(),
                 Value<int> amount = const Value.absent(),
+                Value<int> pricePerDaySnapshot = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReturnEventsCompanion(
                 id: id,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                rentalId: rentalId,
                 rentalItemId: rentalItemId,
                 quantity: quantity,
                 returnedAt: returnedAt,
                 conditionNote: conditionNote,
-                days: days,
+                billableDays: billableDays,
                 amount: amount,
+                pricePerDaySnapshot: pricePerDaySnapshot,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5205,23 +5349,27 @@ class $$ReturnEventsTableTableManager
                 required String id,
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<String> rentalId = const Value.absent(),
                 required String rentalItemId,
                 required int quantity,
                 required DateTime returnedAt,
                 Value<String?> conditionNote = const Value.absent(),
-                required int days,
+                required int billableDays,
                 required int amount,
+                Value<int> pricePerDaySnapshot = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReturnEventsCompanion.insert(
                 id: id,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                rentalId: rentalId,
                 rentalItemId: rentalItemId,
                 quantity: quantity,
                 returnedAt: returnedAt,
                 conditionNote: conditionNote,
-                days: days,
+                billableDays: billableDays,
                 amount: amount,
+                pricePerDaySnapshot: pricePerDaySnapshot,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5236,17 +5384,17 @@ typedef $$ReturnEventsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $ReturnEventsTable,
-      ReturnEvent,
+      ReturnEventRow,
       $$ReturnEventsTableFilterComposer,
       $$ReturnEventsTableOrderingComposer,
       $$ReturnEventsTableAnnotationComposer,
       $$ReturnEventsTableCreateCompanionBuilder,
       $$ReturnEventsTableUpdateCompanionBuilder,
       (
-        ReturnEvent,
-        BaseReferences<_$AppDatabase, $ReturnEventsTable, ReturnEvent>,
+        ReturnEventRow,
+        BaseReferences<_$AppDatabase, $ReturnEventsTable, ReturnEventRow>,
       ),
-      ReturnEvent,
+      ReturnEventRow,
       PrefetchHooks Function()
     >;
 typedef $$AuditLogsTableCreateCompanionBuilder = AuditLogsCompanion Function({
