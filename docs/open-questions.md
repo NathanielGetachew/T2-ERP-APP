@@ -9,3 +9,5 @@
 - Review the new Amharic rental, stock-warning, and billing labels with a native speaker before release.
 - Should voiding require a PIN or owner confirmation once app lock exists?
 - Review the Amharic wording for void, correction, and recreate messages with a native speaker.
+- Automatic scheduled backups to cloud?
+- Backup retention guidance for the client.

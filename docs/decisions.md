@@ -35,3 +35,11 @@
 - Return events must be voided before their rental can be voided. Voiding a return restores its outstanding quantity and recalculates rental status.
 - Voided returns and rentals are excluded from earned revenue, stock usage, estimates, and Home/list statistics, while remaining visible in history.
 - Void and recreate creates a new rental record at the current time and keeps the original record voided.
+
+# Phase 4-early — Encrypted backup and restore
+
+- Backups use a versioned ZIP container with a manifest, a `VACUUM INTO` database snapshot, and all files under the single private-directory allowlist.
+- The final container is encrypted with AES-256-GCM in authenticated 1 MiB chunks, with PBKDF2-HMAC-SHA256 using 210,000 iterations, a random salt, random nonces, and chunk-order/final-marker AAD.
+- Restore is replace-not-merge. The current data receives an encrypted safety copy before the database and private photo directories are swapped.
+- Passwords and key material are never persisted or written to audit logs. Backups are shared from temporary storage and the temporary file is removed afterward when possible.
+- The Home reminder appears when no backup exists or the last backup is at least seven days old.

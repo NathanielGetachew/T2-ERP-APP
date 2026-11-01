@@ -15,6 +15,7 @@ import '../features/rentals/presentation/return_screen.dart';
 import '../features/rentals/presentation/return_summary_screen.dart';
 import '../features/rentals/domain/rental.dart';
 import '../features/settings/presentation/settings_screen.dart';
+import '../features/settings/presentation/backup_screen.dart';
 
 GoRouter createAppRouter() => GoRouter(
   initialLocation: '/',
@@ -23,6 +24,10 @@ GoRouter createAppRouter() => GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/settings/backup',
+      builder: (context, state) => const BackupScreen(),
     ),
     GoRoute(
       path: '/customers',

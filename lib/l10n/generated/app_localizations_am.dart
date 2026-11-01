@@ -543,4 +543,114 @@ class AppLocalizationsAm extends AppLocalizations {
   String voidedReturnReason(Object reason) {
     return 'የተሰረዘ፦ $reason';
   }
+
+  @override
+  String get backupAndRestore => 'ምትኬ እና መመለስ';
+
+  @override
+  String lastBackup(Object date) {
+    return 'የመጨረሻ ምትኬ፦ $date';
+  }
+
+  @override
+  String get neverBackedUp => 'እስካሁን ምትኬ አልተደረገም';
+
+  @override
+  String get backupDataWarning =>
+      'መረጃዎን ምትኬ ያድርጉ። ይህ ምትኬ የደንበኞች መታወቂያ ፎቶዎችን ይዟል፤ በጥንቃቄ ያስቀምጡ።';
+
+  @override
+  String get backupOlderWarning => 'የመጨረሻ ምትኬዎ ከ7 ቀናት በላይ አልፎታል።';
+
+  @override
+  String get createBackup => 'ምትኬ ፍጠር';
+
+  @override
+  String get restoreFromBackup => 'ከምትኬ መልስ';
+
+  @override
+  String get backupPassword => 'የምትኬ የይለፍ ቃል';
+
+  @override
+  String get confirmPassword => 'የይለፍ ቃል አረጋግጥ';
+
+  @override
+  String get passwordMinimum => 'ቢያንስ 8 ቁምፊዎችን ይጠቀሙ።';
+
+  @override
+  String get passwordMismatch => 'የይለፍ ቃሎቹ አይመሳሰሉም።';
+
+  @override
+  String get passwordCannotRecover => 'ይህ የይለፍ ቃል መመለስ አይችልም።';
+
+  @override
+  String get backupPhotoWarning => 'ምትኬው የደንበኞች መታወቂያ ፎቶዎችን ይዟል። በጥንቃቄ ያስቀምጡ።';
+
+  @override
+  String get backupProgress => 'የተመሰጠረ ምትኬ በማዘጋጀት ላይ…';
+
+  @override
+  String get restoreProgress => 'የተመሰጠረ ምትኬ በመመለስ ላይ…';
+
+  @override
+  String get backupCreated => 'የተመሰጠረ ምትኬ ተፈጥሯል።';
+
+  @override
+  String get backupRestored => 'ምትኬው በተሳካ ሁኔታ ተመልሷል።';
+
+  @override
+  String get backupError => 'ምትኬ አልተሳካም። የአሁኑ መረጃዎ አልተቀየረም።';
+
+  @override
+  String get restoreError => 'መመለስ አልተሳካም። የአሁኑ መረጃዎ አልተቀየረም።';
+
+  @override
+  String get restoreReplaceWarning => 'መመለስ የአሁኑን መረጃ በሙሉ ይተካል።';
+
+  @override
+  String restoreSummary(
+    Object customers,
+    Object date,
+    Object materials,
+    Object rentals,
+    Object returns,
+    Object schema,
+  ) {
+    return 'ምትኬ ቀን፦ $date\\nደንበኞች፦ $customers\\nእቃዎች፦ $materials\\nኪራዮች፦ $rentals\\nመመለሻዎች፦ $returns\\nየዳታቤዝ ስሪት፦ $schema';
+  }
+
+  @override
+  String currentDataCounts(Object customers, Object rentals) {
+    return 'የአሁኑ መረጃ፦ $customers ደንበኞች፣ $rentals ኪራዮች';
+  }
+
+  @override
+  String get typeRestore => 'ለመቀጠል RESTORE ይጻፉ';
+
+  @override
+  String get restoreConfirmation => 'RESTORE';
+
+  @override
+  String get selectBackup => 'የ.t2backup ፋይል ይምረጡ';
+
+  @override
+  String get backupFileInvalid => 'ይህ ትክክለኛ የT2 Rental ምትኬ አይደለም።';
+
+  @override
+  String get showPassword => 'የይለፍ ቃል አሳይ';
+
+  @override
+  String get hidePassword => 'የይለፍ ቃል ደብቅ';
+
+  @override
+  String get openBackupFolder => 'የምትኬ ፋይል ይምረጡ';
+
+  @override
+  String get homeBackupReminder => 'መረጃዎን ምትኬ ያድርጉ';
+
+  @override
+  String get backupNeverWarning => 'እስካሁን ምትኬ አልተፈጠረም።';
+
+  @override
+  String get backupShareFailed => 'ምትኬው ተፈጥሯል፣ ግን መጋራት አልተጠናቀቀም።';
 }

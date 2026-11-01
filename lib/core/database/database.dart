@@ -1,8 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:drift/native.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
+
+const appDatabaseSchemaVersion = 4;
+const appDatabaseFileName = 't2_rental.sqlite';
 
 @DataClassName('CustomerRow')
 class Customers extends Table {
@@ -122,12 +126,20 @@ class AuditLogs extends Table {
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
-    : super(executor ?? driftDatabase(name: 't2_rental'));
+    : super(
+        executor ??
+            driftDatabase(
+              name: 't2_rental',
+              native: const DriftNativeOptions(
+                databaseDirectory: getApplicationDocumentsDirectory,
+              ),
+            ),
+      );
 
   AppDatabase.forTesting() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => appDatabaseSchemaVersion;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

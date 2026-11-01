@@ -549,4 +549,119 @@ class AppLocalizationsEn extends AppLocalizations {
   String voidedReturnReason(Object reason) {
     return 'Voided: $reason';
   }
+
+  @override
+  String get backupAndRestore => 'Backup & restore';
+
+  @override
+  String lastBackup(Object date) {
+    return 'Last backup: $date';
+  }
+
+  @override
+  String get neverBackedUp => 'Never backed up';
+
+  @override
+  String get backupDataWarning =>
+      'Back up your data. This backup contains customer ID photos; store it safely.';
+
+  @override
+  String get backupOlderWarning => 'Your last backup is more than 7 days old.';
+
+  @override
+  String get createBackup => 'Create backup';
+
+  @override
+  String get restoreFromBackup => 'Restore from backup';
+
+  @override
+  String get backupPassword => 'Backup password';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get passwordMinimum => 'Use at least 8 characters.';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match.';
+
+  @override
+  String get passwordCannotRecover =>
+      'This password cannot be recovered. If you lose it, the backup cannot be opened.';
+
+  @override
+  String get backupPhotoWarning =>
+      'The backup contains customers\' ID photos. Store it safely.';
+
+  @override
+  String get backupProgress => 'Preparing encrypted backup…';
+
+  @override
+  String get restoreProgress => 'Restoring encrypted backup…';
+
+  @override
+  String get backupCreated => 'Encrypted backup created.';
+
+  @override
+  String get backupRestored => 'Backup restored successfully.';
+
+  @override
+  String get backupError => 'Backup failed. Your current data was not changed.';
+
+  @override
+  String get restoreError =>
+      'Restore failed. Your current data was not changed.';
+
+  @override
+  String get restoreReplaceWarning =>
+      'Restore replaces all current data. This cannot be undone.';
+
+  @override
+  String restoreSummary(
+    Object customers,
+    Object date,
+    Object materials,
+    Object rentals,
+    Object returns,
+    Object schema,
+  ) {
+    return 'Backup from $date\nCustomers: $customers\nMaterials: $materials\nRentals: $rentals\nReturns: $returns\nDatabase version: $schema';
+  }
+
+  @override
+  String currentDataCounts(Object customers, Object rentals) {
+    return 'Current data: $customers customers, $rentals rentals';
+  }
+
+  @override
+  String get typeRestore => 'Type RESTORE to continue';
+
+  @override
+  String get restoreConfirmation => 'RESTORE';
+
+  @override
+  String get selectBackup => 'Select a .t2backup file';
+
+  @override
+  String get backupFileInvalid => 'This file is not a valid T2 Rental backup.';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
+
+  @override
+  String get openBackupFolder => 'Choose backup file';
+
+  @override
+  String get homeBackupReminder => 'Back up your data';
+
+  @override
+  String get backupNeverWarning => 'No backup has been created yet.';
+
+  @override
+  String get backupShareFailed =>
+      'The backup was created, but sharing did not complete. You can find it in temporary storage.';
 }

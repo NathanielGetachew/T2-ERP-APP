@@ -1105,6 +1105,205 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voided: {reason}'**
   String voidedReturnReason(Object reason);
+
+  /// No description provided for @backupAndRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & restore'**
+  String get backupAndRestore;
+
+  /// No description provided for @lastBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}'**
+  String lastBackup(Object date);
+
+  /// No description provided for @neverBackedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Never backed up'**
+  String get neverBackedUp;
+
+  /// No description provided for @backupDataWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your data. This backup contains customer ID photos; store it safely.'**
+  String get backupDataWarning;
+
+  /// No description provided for @backupOlderWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Your last backup is more than 7 days old.'**
+  String get backupOlderWarning;
+
+  /// No description provided for @createBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create backup'**
+  String get createBackup;
+
+  /// No description provided for @restoreFromBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from backup'**
+  String get restoreFromBackup;
+
+  /// No description provided for @backupPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password'**
+  String get backupPassword;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @passwordMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters.'**
+  String get passwordMinimum;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get passwordMismatch;
+
+  /// No description provided for @passwordCannotRecover.
+  ///
+  /// In en, this message translates to:
+  /// **'This password cannot be recovered. If you lose it, the backup cannot be opened.'**
+  String get passwordCannotRecover;
+
+  /// No description provided for @backupPhotoWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup contains customers\' ID photos. Store it safely.'**
+  String get backupPhotoWarning;
+
+  /// No description provided for @backupProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing encrypted backup…'**
+  String get backupProgress;
+
+  /// No description provided for @restoreProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring encrypted backup…'**
+  String get restoreProgress;
+
+  /// No description provided for @backupCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted backup created.'**
+  String get backupCreated;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored successfully.'**
+  String get backupRestored;
+
+  /// No description provided for @backupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed. Your current data was not changed.'**
+  String get backupError;
+
+  /// No description provided for @restoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed. Your current data was not changed.'**
+  String get restoreError;
+
+  /// No description provided for @restoreReplaceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore replaces all current data. This cannot be undone.'**
+  String get restoreReplaceWarning;
+
+  /// No description provided for @restoreSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup from {date}\nCustomers: {customers}\nMaterials: {materials}\nRentals: {rentals}\nReturns: {returns}\nDatabase version: {schema}'**
+  String restoreSummary(
+    Object customers,
+    Object date,
+    Object materials,
+    Object rentals,
+    Object returns,
+    Object schema,
+  );
+
+  /// No description provided for @currentDataCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Current data: {customers} customers, {rentals} rentals'**
+  String currentDataCounts(Object customers, Object rentals);
+
+  /// No description provided for @typeRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Type RESTORE to continue'**
+  String get typeRestore;
+
+  /// No description provided for @restoreConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'RESTORE'**
+  String get restoreConfirmation;
+
+  /// No description provided for @selectBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a .t2backup file'**
+  String get selectBackup;
+
+  /// No description provided for @backupFileInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a valid T2 Rental backup.'**
+  String get backupFileInvalid;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
+  /// No description provided for @openBackupFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose backup file'**
+  String get openBackupFolder;
+
+  /// No description provided for @homeBackupReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your data'**
+  String get homeBackupReminder;
+
+  /// No description provided for @backupNeverWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup has been created yet.'**
+  String get backupNeverWarning;
+
+  /// No description provided for @backupShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup was created, but sharing did not complete. You can find it in temporary storage.'**
+  String get backupShareFailed;
 }
 
 class _AppLocalizationsDelegate

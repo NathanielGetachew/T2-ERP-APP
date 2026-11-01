@@ -24,3 +24,4 @@
 - Added Phase 1 return recording, return summaries, per-event billing, and earned monthly revenue.
 - Fixed Slice D test import ambiguity, billing summary expectation, and Home smoke-test overflow.
 - Added Phase 2 Slice A audited void and correction flows for returns and rentals, including v4 return-event void metadata and void-and-recreate navigation.
+- Added the Phase 4-early encrypted backup and restore foundation with chunked AES-GCM, manifest checksums, safety copies, replacement restore, and backup reminders.

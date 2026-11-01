@@ -102,9 +102,14 @@ void main() {
   });
 
   testWidgets('settings back returns to Home', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(_buildApp());
     await _pumpRoute(tester);
-    await tester.tap(find.text('Settings'));
+    final settingsButton = find.text('Settings');
+    await tester.ensureVisible(settingsButton);
+    await tester.tap(settingsButton);
     await _pumpRoute(tester);
     expect(find.byType(SettingsScreen), findsOneWidget);
 

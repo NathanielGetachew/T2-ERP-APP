@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/money.dart';
+import '../../../core/utils/clock_provider.dart';
+import '../../../core/services/backup/backup_providers.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../rentals/application/rental_providers.dart';
 
@@ -13,10 +15,13 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final activeRentals = ref.watch(activeRentalsProvider);
-    final now = DateTime.now();
+    final now = ref.watch(clockProvider).now();
     final monthlyRevenue = ref.watch(
       monthlyRevenueProvider((year: now.year, month: now.month)),
     );
+    final lastBackup = ref.watch(lastBackupAtProvider).valueOrNull;
+    final backupIsOld =
+        lastBackup == null || now.difference(lastBackup).inDays >= 7;
     final activeCount = activeRentals.valueOrNull?.length ?? 0;
     final itemsOut =
         activeRentals.valueOrNull?.fold<int>(
@@ -44,6 +49,23 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(l10n.phase0Message, textAlign: TextAlign.center),
+                if (backupIsOld) ...[
+                  const SizedBox(height: 16),
+                  Card(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: ListTile(
+                      key: const ValueKey('home_backup_reminder'),
+                      leading: const Icon(Icons.warning_amber_outlined),
+                      title: Text(l10n.homeBackupReminder),
+                      subtitle: Text(
+                        lastBackup == null
+                            ? l10n.backupNeverWarning
+                            : l10n.backupOlderWarning,
+                      ),
+                      onTap: () => context.push('/settings/backup'),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 FilledButton.icon(
                   key: const ValueKey('home_new_rental_button'),

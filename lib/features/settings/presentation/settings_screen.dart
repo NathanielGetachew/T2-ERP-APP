@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/widgets/safe_back_button.dart';
@@ -31,6 +32,13 @@ class SettingsScreen extends ConsumerWidget {
             onSelectionChanged: (values) {
               ref.read(localeProvider.notifier).setLocale(Locale(values.first));
             },
+          ),
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            key: const ValueKey('backup_restore_button'),
+            onPressed: () => context.push('/settings/backup'),
+            icon: const Icon(Icons.backup_outlined),
+            label: Text(l10n.backupAndRestore),
           ),
         ],
       ),
