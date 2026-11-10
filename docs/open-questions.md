@@ -11,3 +11,4 @@
 - Review the Amharic wording for void, correction, and recreate messages with a native speaker.
 - Automatic scheduled backups to cloud?
 - Backup retention guidance for the client.
+- Review the new Amharic dashboard, analytics, and period terms (e.g., 'Unit-days' / 'እቃ-ቀናት', 'Outstanding estimate' / 'ያልተመለሱ ኪራዮች ግምት') with a native speaker.

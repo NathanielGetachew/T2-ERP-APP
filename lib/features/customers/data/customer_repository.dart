@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:drift/drift.dart';
 
 import '../../../core/database/database.dart' as db;
+import '../../../core/utils/uuid.dart';
 import '../domain/customer.dart';
 import '../domain/customer_repository.dart';
 import '../domain/customer_validation.dart';
@@ -59,7 +59,7 @@ class DriftCustomerRepository implements CustomerRepository {
     );
     final now = DateTime.now().toUtc();
     final customer = Customer(
-      id: _uuidV4(),
+      id: uuidV4(),
       fullName: normalized.fullName,
       address: normalized.address,
       phone: normalized.phone,
@@ -151,7 +151,7 @@ class DriftCustomerRepository implements CustomerRepository {
           .into(database.auditLogs)
           .insert(
             db.AuditLogsCompanion.insert(
-              id: _uuidV4(),
+              id: uuidV4(),
               createdAt: updatedAt,
               updatedAt: updatedAt,
               entityType: 'customer',
@@ -235,7 +235,7 @@ class DriftCustomerRepository implements CustomerRepository {
         .into(database.auditLogs)
         .insert(
           db.AuditLogsCompanion.insert(
-            id: _uuidV4(),
+            id: uuidV4(),
             createdAt: now,
             updatedAt: now,
             entityType: 'customer',
@@ -341,15 +341,4 @@ class DriftCustomerRepository implements CustomerRepository {
         idPhotoBack: Value(customer.idPhotoBackPath),
         notes: Value(customer.notes),
       );
-}
-
-String _uuidV4() {
-  final random = Random.secure();
-  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  final hex = bytes
-      .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-      .join();
-  return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
 }

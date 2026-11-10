@@ -27,6 +27,8 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final materials = ref.watch(materialsProvider);
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.materials),
@@ -35,13 +37,13 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: TextField(
               controller: _searchController,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 labelText: l10n.searchMaterials,
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: _searchController.text.isEmpty
                     ? null
                     : IconButton(
@@ -49,16 +51,31 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
                           _searchController.clear();
                           setState(() {});
                         },
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear_rounded),
                       ),
               ),
             ),
           ),
-          SwitchListTile(
-            title: Text(l10n.showInactive),
-            value: ref.watch(showInactiveMaterialsProvider),
-            onChanged: (value) =>
-                ref.read(showInactiveMaterialsProvider.notifier).state = value,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  l10n.showInactive,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Switch.adaptive(
+                  value: ref.watch(showInactiveMaterialsProvider),
+                  onChanged: (value) =>
+                      ref.read(showInactiveMaterialsProvider.notifier).state =
+                          value,
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: materials.when(
@@ -72,32 +89,146 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
                       item.name.toLowerCase().contains(query);
                 }).toList();
                 if (filtered.isEmpty) {
-                  return Center(child: Text(l10n.noMaterials));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 48,
+                          color: theme.colorScheme.outline,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.noMaterials,
+                          style: TextStyle(color: theme.colorScheme.outline),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     final material = filtered[index];
-                    return Card(
-                      child: ListTile(
-                        enabled: material.isActive,
-                        minVerticalPadding: 12,
-                        title: Text('${material.category} · ${material.name}'),
-                        subtitle: Text(
-                          '${l10n.pricePerDay}: ${formatEtb(material.pricePerDay)}'
-                          '${material.totalStock == null ? '' : '\n${l10n.stock}: ${material.totalStock}'}',
-                        ),
-                        trailing: material.isActive
-                            ? null
-                            : Text(
-                                l10n.inactive,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.outline,
+                    final isMuted = !material.isActive;
+                    return Opacity(
+                      opacity: isMuted ? 0.6 : 1.0,
+                      child: Card(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () =>
+                              context.push('/materials/edit?id=${material.id}'),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.primary
+                                            .withAlpha(20),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        material.category,
+                                        style: TextStyle(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isMuted)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade200,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          l10n.inactive,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey.shade700,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              ),
-                        onTap: () =>
-                            context.push('/materials/edit?id=${material.id}'),
+                                const SizedBox(height: 10),
+                                Text(
+                                  '${material.category} · ${material.name}',
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                const Divider(height: 1),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.payments_outlined,
+                                          size: 16,
+                                          color: Colors.green.shade700,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${l10n.pricePerDay}: ${formatEtb(material.pricePerDay)}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green.shade800,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (material.totalStock != null)
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.inventory_outlined,
+                                            size: 16,
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${l10n.stock}: ${material.totalStock}',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: theme.colorScheme.outline,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -109,7 +240,7 @@ class _MaterialsScreenState extends ConsumerState<MaterialsScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/materials/new'),
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add_rounded),
         label: Text(l10n.addMaterial),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/database.dart' as db;
 import '../../../core/utils/clock.dart';
+import '../../../core/utils/uuid.dart';
 import '../../billing/rental_billing.dart';
 import '../domain/rental.dart';
 import '../domain/rental_repository.dart';
@@ -149,7 +150,7 @@ class DriftRentalRepository implements RentalRepository {
       final now = clock.now().toUtc();
       final rentalNumber = await _nextRentalNumber();
       final rental = RentalRecord(
-        id: _uuidV4(),
+        id: uuidV4(),
         rentalNumber: rentalNumber,
         customerId: customerId,
         rentedAt: now,
@@ -176,7 +177,7 @@ class DriftRentalRepository implements RentalRepository {
       for (final line in lines) {
         final material = materialRows[line.materialId]!;
         final saved = RentalLine(
-          id: _uuidV4(),
+          id: uuidV4(),
           rentalId: rental.id,
           materialId: material.id,
           materialNameSnapshot: material.name,
@@ -205,7 +206,7 @@ class DriftRentalRepository implements RentalRepository {
           .into(database.auditLogs)
           .insert(
             db.AuditLogsCompanion.insert(
-              id: _uuidV4(),
+              id: uuidV4(),
               createdAt: now,
               updatedAt: now,
               entityType: 'rental',
@@ -332,7 +333,7 @@ class DriftRentalRepository implements RentalRepository {
           days: days,
         );
         final event = ReturnEventRecord(
-          id: _uuidV4(),
+          id: uuidV4(),
           rentalId: rentalId,
           rentalItemId: item.id,
           quantity: line.quantity,
@@ -400,7 +401,7 @@ class DriftRentalRepository implements RentalRepository {
           .into(database.auditLogs)
           .insert(
             db.AuditLogsCompanion.insert(
-              id: _uuidV4(),
+              id: uuidV4(),
               createdAt: returnedAt,
               updatedAt: returnedAt,
               entityType: 'rental',
@@ -574,7 +575,7 @@ class DriftRentalRepository implements RentalRepository {
           .into(database.auditLogs)
           .insert(
             db.AuditLogsCompanion.insert(
-              id: _uuidV4(),
+              id: uuidV4(),
               createdAt: now,
               updatedAt: now,
               entityType: 'rental',
@@ -653,7 +654,7 @@ class DriftRentalRepository implements RentalRepository {
           .into(database.auditLogs)
           .insert(
             db.AuditLogsCompanion.insert(
-              id: _uuidV4(),
+              id: uuidV4(),
               createdAt: now,
               updatedAt: now,
               entityType: 'rental',
@@ -802,15 +803,4 @@ class DriftRentalRepository implements RentalRepository {
 
   static String _formatNumber(int number) =>
       'R-${number.toString().padLeft(4, '0')}';
-}
-
-String _uuidV4() {
-  final random = Random.secure();
-  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  final hex = bytes
-      .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-      .join();
-  return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
 }

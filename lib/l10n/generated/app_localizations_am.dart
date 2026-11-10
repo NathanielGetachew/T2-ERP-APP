@@ -432,7 +432,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get earnedSoFar => 'እስካሁን የተገኘ';
 
   @override
-  String get outstandingEstimate => 'ያልተመለሰ ግምት';
+  String get outstandingEstimate => 'ያልተመለሱ ኪራዮች ግምት';
 
   @override
   String get finalTotal => 'የመጨረሻ ጠቅላላ';
@@ -653,4 +653,118 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get backupShareFailed => 'ምትኬው ተፈጥሯል፣ ግን መጋራት አልተጠናቀቀም።';
+
+  @override
+  String get dashboard => 'ዳሽቦርድ';
+
+  @override
+  String get thisMonth => 'የዚህ ወር';
+
+  @override
+  String get lastMonth => 'ያለፈው ወር';
+
+  @override
+  String get last3Months => 'ያለፉት 3 ወራት';
+
+  @override
+  String get thisYear => 'የዚህ ዓመት';
+
+  @override
+  String get customRange => 'የተመረጠ ክልል';
+
+  @override
+  String get selectDateRange => 'የቀን ክልል ይምረጡ';
+
+  @override
+  String get earnedRevenue => 'የተገኘ ገቢ';
+
+  @override
+  String previousMonthRevenue(Object amount) {
+    return 'ያለፈው ወር፦ $amount';
+  }
+
+  @override
+  String get revenueTrend => 'የገቢ ሁኔታ (ያለፉት 12 ወራት)';
+
+  @override
+  String get averageDuration => 'አማካይ የኪራይ ቆይታ';
+
+  @override
+  String durationDays(Object days) {
+    return '$days ቀናት';
+  }
+
+  @override
+  String get durationTrend => 'የቆይታ ሁኔታ (ያለፉት 6 ወራት)';
+
+  @override
+  String get noCompletedRentals => 'በዚህ ጊዜ ውስጥ የተጠናቀቀ ኪራይ የለም';
+
+  @override
+  String get mostRentedMaterials => 'በብዛት የተከራዩ እቃዎች';
+
+  @override
+  String get unitDays => 'እቃ-ቀናት';
+
+  @override
+  String get timesRented => 'የተከራየበት ጊዜ';
+
+  @override
+  String get totalQuantity => 'አጠቃላይ ብዛት';
+
+  @override
+  String get showAll => 'ሁሉንም አሳይ';
+
+  @override
+  String get showLess => 'በትንሹ አሳይ';
+
+  @override
+  String get currentlyOut => 'በአሁኑ ጊዜ ውጪ ያሉ';
+
+  @override
+  String get units => 'እቃዎች';
+
+  @override
+  String longRunningRentals(Object days) {
+    return 'ለረጅም ጊዜ የቆዩ ኪራዮች (≥ $days ቀናት)';
+  }
+
+  @override
+  String get noLongRunning => 'ለረጅም ጊዜ የቆየ ኪራይ የለም';
+
+  @override
+  String get newCustomers => 'አዲስ ደንበኞች';
+
+  @override
+  String get returningCustomers => 'ተመላሽ ደንበኞች';
+
+  @override
+  String get topByRevenue => 'በገቢ ከፍተኛ';
+
+  @override
+  String get topByRentals => 'በኪራይ ብዛት ከፍተኛ';
+
+  @override
+  String get longRunningThreshold => 'የረጅም ጊዜ ቆይታ ወሰን (ቀናት)';
+
+  @override
+  String get invalidThreshold => 'ከ 1 እስከ 365 ያለ ቁጥር ያስገቡ';
+
+  @override
+  String get noData => 'ምንም መረጃ የለም';
+
+  @override
+  String get estimateDisclaimer => 'ንቁ ኪራዮች ዛሬ ቢመለሱ የሚገመት ዋጋ';
+
+  @override
+  String get periodSummary => 'የጊዜው ማጠቃለያ';
+
+  @override
+  String get noMaterialsRented => 'በዚህ ጊዜ ውስጥ የተከራየ እቃ የለም';
+
+  @override
+  String get noCustomersInPeriod => 'በዚህ ጊዜ ውስጥ ደንበኞች የሉም';
+
+  @override
+  String get noActiveRentals => 'ምንም ንቁ ኪራይ የለም';
 }

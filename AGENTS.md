@@ -156,7 +156,7 @@ Revenue reporting depends on these calculations being correct (see §7A definiti
 4. **Return Flow:** pick quantities returned per line (default: all), confirm → shows days, per-line cost, total, amount due.
 5. **Customers:** searchable list, profile with full rental history.
 6. **Materials Catalog:** add/edit types and price/day.
-7. **Settings:** **language switch (Amharic / English)**, app lock, about. (Currency is fixed to ETB. Backup/restore is deferred.)
+7. **Settings:** **language switch (Amharic / English)**, backup & restore, app lock, about. (Currency is fixed to ETB.)
 
 Validation: customer name and address required, ID photo required (with an explicit override + reason), quantity ≥ 1, availability check if stock tracked.
 
@@ -201,7 +201,7 @@ Purpose: let the owner see how the business is doing at a glance. Read-only; com
 - App lock with PIN/biometric on launch and after inactivity.
 - No analytics or third-party SDKs that send personal data.
 - Exclude sensitive screens from screenshots/recents where practical (`FLAG_SECURE`).
-- Backup/restore is deferred; when added later it must be encrypted and password-protected.
+- Backup & restore is implemented with chunked AES-256-GCM encryption, password protection, and safety copies.
 - Do not log personal data or file contents.
 - Note for the client: storing national ID images may be subject to local data-protection law; recommend a short consent statement on the receipt.
 
@@ -240,10 +240,10 @@ Scaffold project, lints, theme, router, **l10n setup with English and Amharic AR
 **Phase 4 — Safety & polish**
 - DB/image encryption, app lock (PIN/biometric).
 - Accessibility, performance on low-end devices.
-- (Deferred by client: backup/restore. Revisit when requested.)
+- (Encrypted backup & restore: completed early)
 
 **Phase 5 — Optional**
-- Backup/restore, multi-device/multi-staff with cloud sync (Supabase/Firebase), roles, late fees/damage charges, deposits, ID number OCR (ML Kit), SMS/Telegram reminders.
+- Multi-device/multi-staff with cloud sync (Supabase/Firebase), roles, late fees/damage charges, deposits, ID number OCR (ML Kit), SMS/Telegram reminders.
 
 Do not start a later phase until the current phase's acceptance checks pass.
 
@@ -279,7 +279,7 @@ Do not start a later phase until the current phase's acceptance checks pass.
 3. No late fees, damage or loss charges for now.
 4. Currency ETB; languages Amharic and English, switchable from Settings.
 5. National ID is captured as a **photo only**; customer name and address are typed.
-6. Backup is deferred to a later phase.
+6. Encrypted backup & restore is implemented with authenticated encryption and safety-copy rollback.
 
 **Still open (defaults assumed)**
 - Customer on-screen signature: optional, Phase 2.

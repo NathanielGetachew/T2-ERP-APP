@@ -14,6 +14,7 @@ import '../features/rentals/presentation/rentals_screen.dart';
 import '../features/rentals/presentation/return_screen.dart';
 import '../features/rentals/presentation/return_summary_screen.dart';
 import '../features/rentals/domain/rental.dart';
+import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/settings/presentation/backup_screen.dart';
 
@@ -21,6 +22,10 @@ GoRouter createAppRouter() => GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const DashboardScreen(),
+    ),
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),

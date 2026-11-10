@@ -1304,6 +1304,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The backup was created, but sharing did not complete. You can find it in temporary storage.'**
   String get backupShareFailed;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get thisMonth;
+
+  /// No description provided for @lastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get lastMonth;
+
+  /// No description provided for @last3Months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 3 months'**
+  String get last3Months;
+
+  /// No description provided for @thisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get thisYear;
+
+  /// No description provided for @customRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range'**
+  String get customRange;
+
+  /// No description provided for @selectDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date range'**
+  String get selectDateRange;
+
+  /// No description provided for @earnedRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned revenue'**
+  String get earnedRevenue;
+
+  /// No description provided for @previousMonthRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month: {amount}'**
+  String previousMonthRevenue(Object amount);
+
+  /// No description provided for @revenueTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue trend (last 12 months)'**
+  String get revenueTrend;
+
+  /// No description provided for @averageDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Average rental duration'**
+  String get averageDuration;
+
+  /// No description provided for @durationDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String durationDays(Object days);
+
+  /// No description provided for @durationTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration trend (last 6 months)'**
+  String get durationTrend;
+
+  /// No description provided for @noCompletedRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed rentals in this period'**
+  String get noCompletedRentals;
+
+  /// No description provided for @mostRentedMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Most rented materials'**
+  String get mostRentedMaterials;
+
+  /// No description provided for @unitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit-days'**
+  String get unitDays;
+
+  /// No description provided for @timesRented.
+  ///
+  /// In en, this message translates to:
+  /// **'Times rented'**
+  String get timesRented;
+
+  /// No description provided for @totalQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Total quantity'**
+  String get totalQuantity;
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get showAll;
+
+  /// No description provided for @showLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get showLess;
+
+  /// No description provided for @currentlyOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently out'**
+  String get currentlyOut;
+
+  /// No description provided for @units.
+  ///
+  /// In en, this message translates to:
+  /// **'units'**
+  String get units;
+
+  /// No description provided for @longRunningRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-running rentals (≥ {days} days)'**
+  String longRunningRentals(Object days);
+
+  /// No description provided for @noLongRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'No long-running rentals'**
+  String get noLongRunning;
+
+  /// No description provided for @newCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'New customers'**
+  String get newCustomers;
+
+  /// No description provided for @returningCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Returning customers'**
+  String get returningCustomers;
+
+  /// No description provided for @topByRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Top by revenue'**
+  String get topByRevenue;
+
+  /// No description provided for @topByRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'Top by rentals'**
+  String get topByRentals;
+
+  /// No description provided for @longRunningThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-running threshold (days)'**
+  String get longRunningThreshold;
+
+  /// No description provided for @invalidThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number between 1 and 365'**
+  String get invalidThreshold;
+
+  /// No description provided for @noData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get noData;
+
+  /// No description provided for @estimateDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Running estimate if active rentals are returned today'**
+  String get estimateDisclaimer;
+
+  /// No description provided for @periodSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Period summary'**
+  String get periodSummary;
+
+  /// No description provided for @noMaterialsRented.
+  ///
+  /// In en, this message translates to:
+  /// **'No materials rented in this period'**
+  String get noMaterialsRented;
+
+  /// No description provided for @noCustomersInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers in this period'**
+  String get noCustomersInPeriod;
+
+  /// No description provided for @noActiveRentals.
+  ///
+  /// In en, this message translates to:
+  /// **'No active rentals'**
+  String get noActiveRentals;
 }
 
 class _AppLocalizationsDelegate

@@ -43,3 +43,16 @@
 - Restore is replace-not-merge. The current data receives an encrypted safety copy before the database and private photo directories are swapped.
 - Passwords and key material are never persisted or written to audit logs. Backups are shared from temporary storage and the temporary file is removed afterward when possible.
 - The Home reminder appears when no backup exists or the last backup is at least seven days old.
+- UUID generation is unified into a single crypto-random RFC 4122 v4 generator in `core/utils/uuid.dart`, eliminating duplicated private implementations.
+
+# Phase 3 — Dashboard and Analytics
+
+- Metrics computation is pure Dart (`computeDashboardMetrics`) without Flutter or Drift dependencies, making all analytics 100% unit-testable with hand-computed arithmetic.
+- Time grouping: All events and rental dates are stored in UTC and converted to the device's local timezone for day and month grouping. Ethiopia has no DST, but offsets are dynamically resolved without hard-coding.
+- Revenue: Earned revenue is the sum of `ReturnEvent.amount` grouped by the local month of `returnedAt`. Voided rentals and voided returns are excluded. Active rentals contribute zero to earned revenue.
+- Outstanding estimate: Running cost ("if returned today") of active rentals is computed from `rentedAt` to the current local date inclusive, and clearly labelled as an estimate.
+- Average duration: Average calendar days from rental date to the date of the final return over completed rentals returned in the period.
+- Material ranking: Ranked by unit-days (`quantity * days`) by default, with toggles for times rented and total quantity. Ties are broken alphabetically by name.
+- Long-running threshold: Configurable between 1 and 365 days (default 14), editable from Settings, and persisted to app storage.
+- Charting: Built with `fl_chart` using BarChart with responsive bar sizing, graceful zero/empty handling, ETB tooltips, and an accessible expandable monthly summary below the chart.
+

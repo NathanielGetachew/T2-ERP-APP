@@ -664,4 +664,119 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupShareFailed =>
       'The backup was created, but sharing did not complete. You can find it in temporary storage.';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get thisMonth => 'This month';
+
+  @override
+  String get lastMonth => 'Last month';
+
+  @override
+  String get last3Months => 'Last 3 months';
+
+  @override
+  String get thisYear => 'This year';
+
+  @override
+  String get customRange => 'Custom range';
+
+  @override
+  String get selectDateRange => 'Select date range';
+
+  @override
+  String get earnedRevenue => 'Earned revenue';
+
+  @override
+  String previousMonthRevenue(Object amount) {
+    return 'Previous month: $amount';
+  }
+
+  @override
+  String get revenueTrend => 'Revenue trend (last 12 months)';
+
+  @override
+  String get averageDuration => 'Average rental duration';
+
+  @override
+  String durationDays(Object days) {
+    return '$days days';
+  }
+
+  @override
+  String get durationTrend => 'Duration trend (last 6 months)';
+
+  @override
+  String get noCompletedRentals => 'No completed rentals in this period';
+
+  @override
+  String get mostRentedMaterials => 'Most rented materials';
+
+  @override
+  String get unitDays => 'Unit-days';
+
+  @override
+  String get timesRented => 'Times rented';
+
+  @override
+  String get totalQuantity => 'Total quantity';
+
+  @override
+  String get showAll => 'Show all';
+
+  @override
+  String get showLess => 'Show less';
+
+  @override
+  String get currentlyOut => 'Currently out';
+
+  @override
+  String get units => 'units';
+
+  @override
+  String longRunningRentals(Object days) {
+    return 'Long-running rentals (≥ $days days)';
+  }
+
+  @override
+  String get noLongRunning => 'No long-running rentals';
+
+  @override
+  String get newCustomers => 'New customers';
+
+  @override
+  String get returningCustomers => 'Returning customers';
+
+  @override
+  String get topByRevenue => 'Top by revenue';
+
+  @override
+  String get topByRentals => 'Top by rentals';
+
+  @override
+  String get longRunningThreshold => 'Long-running threshold (days)';
+
+  @override
+  String get invalidThreshold => 'Enter a number between 1 and 365';
+
+  @override
+  String get noData => 'No data available';
+
+  @override
+  String get estimateDisclaimer =>
+      'Running estimate if active rentals are returned today';
+
+  @override
+  String get periodSummary => 'Period summary';
+
+  @override
+  String get noMaterialsRented => 'No materials rented in this period';
+
+  @override
+  String get noCustomersInPeriod => 'No customers in this period';
+
+  @override
+  String get noActiveRentals => 'No active rentals';
 }
