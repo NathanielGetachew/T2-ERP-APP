@@ -1,7 +1,22 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// ---------------------------------------------------------------------------
+// Release signing: reads keystore details from android/key.properties.
+// Debug builds work without it. A RELEASE build without key.properties
+// fails loudly so the developer knows they must create the file.
+// ---------------------------------------------------------------------------
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+val hasKeystoreProperties = keystorePropertiesFile.exists()
+if (hasKeystoreProperties) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -15,26 +30,54 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.yonastigistu.t2_rental"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    if (hasKeystoreProperties) {
+        signingConfigs {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            if (hasKeystoreProperties) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            // If key.properties is missing, signingConfig is left unset.
+            // The taskGraph hook below ensures the release build fails loudly
+            // rather than silently falling back to debug signing.
         }
+    }
+}
+
+// Ensure release builds fail with a clear, helpful message when key.properties is missing,
+// while allowing debug builds (flutter run, assembleDebug) to build without it.
+gradle.taskGraph.whenReady {
+    val isReleaseRequested = allTasks.any {
+        it.name.contains("Release", ignoreCase = true) && !it.name.contains("Test", ignoreCase = true)
+    }
+    if (isReleaseRequested && !hasKeystoreProperties) {
+        throw GradleException(
+            """
+            |
+            | *** RELEASE BUILD FAILED: android/key.properties not found ***
+            |
+            | To build a release APK you must create android/key.properties
+            | with your keystore details. See android/key.properties.example
+            | and docs/release.md for instructions.
+            |
+            """.trimMargin()
+        )
     }
 }
 

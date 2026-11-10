@@ -65,4 +65,10 @@
 - **Voiding remains per-event**: Voiding remains granular at the individual `ReturnEvent` level. A voided event preserves its `returnBatchId` and is shown muted/struck-through; voiding recalculates line outstanding and rental status.
 - **Customer Held Items calculation**: Active rentals (both `active` and `partiallyReturned`) contribute their non-zero `outstandingQuantity` per material. Voided rentals and voided return events are strictly excluded.
 
+# Release Signing & Manifest Configuration
+
+- **`android:allowBackup="false"`**: Set in `AndroidManifest.xml` to prevent automatic Android OS cloud backups (Google Drive / ADB backups) from copying unencrypted SQLite databases and sensitive customer National ID photos to unencrypted third-party storage. T2 Rental provides its own user-controlled, password-protected AES-256-GCM encrypted backup mechanism.
+- **Signed release configuration**: `android/app/build.gradle.kts` reads keystore credentials from `android/key.properties`. If `key.properties` is missing when attempting a release build, Gradle halts with an explicit error message to prevent accidental distribution of debug-signed APKs. Debug builds (`flutter run`) build without requiring `key.properties`.
+- **R8 / Minification**: Follows Flutter's standard AOT compilation. Used plugins (`image_picker`, `file_picker`, `share_plus`, `drift/sqlite`, `archive`, `cryptography`) operate smoothly with Flutter's consumer proguard rules without extra keep rules since data access is fully typed and code-generated.
+
 

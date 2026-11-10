@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/services/backup/backup_providers.dart';
 import '../../../core/utils/clock_provider.dart';
 import '../../../core/utils/money.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -20,9 +19,6 @@ class HomeScreen extends ConsumerWidget {
     final monthlyRevenue = ref.watch(
       monthlyRevenueProvider((year: now.year, month: now.month)),
     );
-    final lastBackup = ref.watch(lastBackupAtProvider).valueOrNull;
-    final backupIsOld =
-        lastBackup == null || now.difference(lastBackup).inDays >= 7;
     final activeCount = activeRentals.valueOrNull?.length ?? 0;
     final itemsOut =
         activeRentals.valueOrNull?.fold<int>(
@@ -52,43 +48,6 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Backup reminder banner
-            if (backupIsOld) ...[
-              Card(
-                color: Colors.amber.shade50,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.amber.shade300, width: 1),
-                ),
-                child: ListTile(
-                  key: const ValueKey('home_backup_reminder'),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.amber.shade100,
-                    child: Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.amber.shade900,
-                    ),
-                  ),
-                  title: Text(
-                    l10n.homeBackupReminder,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.amber.shade900,
-                    ),
-                  ),
-                  subtitle: Text(
-                    lastBackup == null
-                        ? l10n.backupNeverWarning
-                        : l10n.backupOlderWarning,
-                    style: TextStyle(color: Colors.amber.shade900),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/settings/backup'),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-
             // Section Title
             Padding(
               padding: const EdgeInsets.only(bottom: 12),

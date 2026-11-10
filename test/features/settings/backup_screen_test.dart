@@ -12,6 +12,7 @@ import 'package:t2_rental/core/utils/clock_provider.dart';
 import 'package:t2_rental/features/home/presentation/home_screen.dart';
 import 'package:t2_rental/features/rentals/application/rental_providers.dart';
 import 'package:t2_rental/features/settings/presentation/backup_screen.dart';
+import 'package:t2_rental/features/settings/presentation/settings_screen.dart';
 import 'package:t2_rental/l10n/generated/app_localizations.dart';
 
 import '../../helpers/fake_backup_service.dart';
@@ -292,7 +293,99 @@ void main() {
     },
   );
 
-  testWidgets('Home banner shows when never backed up', (tester) async {
+  testWidgets('Settings banner shows when never backed up', (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final clock = FakeClock(DateTime.utc(2026, 11, 10, 12, 0));
+
+    await tester.pumpWidget(
+      _buildScreen(
+        child: const SettingsScreen(),
+        overrides: [
+          clockProvider.overrideWithValue(clock),
+          lastBackupAtProvider.overrideWith((ref) => null),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('settings_backup_reminder')),
+      findsOneWidget,
+    );
+    expect(find.text('No backup has been created yet.'), findsOneWidget);
+
+    await disposeWidgetTree(tester);
+  });
+
+  testWidgets('Settings banner shows when backup is > 7 days old', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final clock = FakeClock(DateTime.utc(2026, 11, 10, 12, 0));
+    final eightDaysAgo = DateTime.utc(2026, 11, 2, 12, 0);
+
+    await tester.pumpWidget(
+      _buildScreen(
+        child: const SettingsScreen(),
+        overrides: [
+          clockProvider.overrideWithValue(clock),
+          lastBackupAtProvider.overrideWith((ref) => eightDaysAgo),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('settings_backup_reminder')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Your last backup is more than 7 days old.'),
+      findsOneWidget,
+    );
+
+    await disposeWidgetTree(tester);
+  });
+
+  testWidgets('Settings banner is hidden when backup is recent (< 7 days)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final clock = FakeClock(DateTime.utc(2026, 11, 10, 12, 0));
+    final twoDaysAgo = DateTime.utc(2026, 11, 8, 12, 0);
+
+    await tester.pumpWidget(
+      _buildScreen(
+        child: const SettingsScreen(),
+        overrides: [
+          clockProvider.overrideWithValue(clock),
+          lastBackupAtProvider.overrideWith((ref) => twoDaysAgo),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('settings_backup_reminder')),
+      findsNothing,
+    );
+
+    await disposeWidgetTree(tester);
+  });
+
+  testWidgets('Home screen does not show backup banner', (tester) async {
     tester.view.physicalSize = const Size(800, 1400);
     addTearDown(tester.view.resetPhysicalSize);
 
@@ -310,62 +403,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('home_backup_reminder')), findsOneWidget);
-    expect(find.text('No backup has been created yet.'), findsOneWidget);
-
-    await disposeWidgetTree(tester);
-  });
-
-  testWidgets('Home banner shows when backup is > 7 days old', (tester) async {
-    tester.view.physicalSize = const Size(800, 1400);
-    addTearDown(tester.view.resetPhysicalSize);
-
-    final clock = FakeClock(DateTime.utc(2026, 11, 10, 12, 0));
-    final eightDaysAgo = DateTime.utc(2026, 11, 2, 12, 0);
-
-    await tester.pumpWidget(
-      _buildScreen(
-        child: const HomeScreen(),
-        overrides: [
-          clockProvider.overrideWithValue(clock),
-          rentalRepositoryProvider.overrideWithValue(FakeRentalRepository()),
-          lastBackupAtProvider.overrideWith((ref) => eightDaysAgo),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const ValueKey('home_backup_reminder')), findsOneWidget);
-    expect(
-      find.text('Your last backup is more than 7 days old.'),
-      findsOneWidget,
-    );
-
-    await disposeWidgetTree(tester);
-  });
-
-  testWidgets('Home banner is hidden when backup is recent (< 7 days)', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(800, 1400);
-    addTearDown(tester.view.resetPhysicalSize);
-
-    final clock = FakeClock(DateTime.utc(2026, 11, 10, 12, 0));
-    final twoDaysAgo = DateTime.utc(2026, 11, 8, 12, 0);
-
-    await tester.pumpWidget(
-      _buildScreen(
-        child: const HomeScreen(),
-        overrides: [
-          clockProvider.overrideWithValue(clock),
-          rentalRepositoryProvider.overrideWithValue(FakeRentalRepository()),
-          lastBackupAtProvider.overrideWith((ref) => twoDaysAgo),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
-
     expect(find.byKey(const ValueKey('home_backup_reminder')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('settings_backup_reminder')),
+      findsNothing,
+    );
 
     await disposeWidgetTree(tester);
   });

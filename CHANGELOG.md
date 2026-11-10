@@ -62,3 +62,7 @@
     - Linked return events with batch IDs in rental history to their batch summaries.
     - Added full English and Amharic localization for all new screens, dialogs, and error messages.
     - Added comprehensive unit and widget tests covering hand-computed billing, oldest-first allocation, price snapshot preservation, validation, atomic rollback, and UI interactions.
+- Moved backup reminder warning badge and banner from Home screen to Settings screen under Backup & Restore.
+- Added Android release signing configuration reading from `android/key.properties`, ensuring release builds fail with an informative prompt when keys are missing while allowing debug builds (`flutter run`) to run unhindered.
+- Added `android:allowBackup="false"` to `AndroidManifest.xml` to protect local SQLite data and customer National ID photos from unencrypted OS backups.
+- Added `android/key.properties.example`, `.gitignore` entries for keystores and signing properties, and comprehensive documentation in `docs/release.md`.

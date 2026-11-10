@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/services/backup/backup_providers.dart';
+import '../../../core/utils/clock_provider.dart';
 import '../../../core/widgets/safe_back_button.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../dashboard/application/long_running_threshold_provider.dart';
@@ -16,6 +18,10 @@ class SettingsScreen extends ConsumerWidget {
     final selected = ref.watch(localeProvider)?.languageCode ?? 'en';
     final threshold = ref.watch(longRunningThresholdProvider);
     final theme = Theme.of(context);
+    final now = ref.watch(clockProvider).now();
+    final lastBackup = ref.watch(lastBackupAtProvider).valueOrNull;
+    final backupIsOld =
+        lastBackup == null || now.difference(lastBackup).inDays >= 7;
 
     return Scaffold(
       appBar: AppBar(
@@ -141,14 +147,86 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Section 3: Data Security & Backup
-          Text(
-            l10n.backupAndRestore,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
+          Row(
+            children: [
+              Text(
+                l10n.backupAndRestore,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              if (backupIsOld) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amber.shade400),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 14,
+                        color: Colors.amber.shade900,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.homeBackupReminder,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 10),
+          if (backupIsOld) ...[
+            Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              color: Colors.amber.shade50,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.amber.shade300, width: 1),
+              ),
+              child: ListTile(
+                key: const ValueKey('settings_backup_reminder'),
+                leading: CircleAvatar(
+                  backgroundColor: Colors.amber.shade100,
+                  child: Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+                title: Text(
+                  l10n.homeBackupReminder,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+                subtitle: Text(
+                  lastBackup == null
+                      ? l10n.backupNeverWarning
+                      : l10n.backupOlderWarning,
+                  style: TextStyle(color: Colors.amber.shade900),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/settings/backup'),
+              ),
+            ),
+          ],
           Card(
             margin: EdgeInsets.zero,
             child: Padding(
