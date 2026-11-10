@@ -10,14 +10,7 @@ import '../../billing/rental_billing.dart';
 import '../domain/rental.dart';
 import '../domain/rental_repository.dart';
 
-class RentalValidationException implements Exception {
-  const RentalValidationException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
+export '../domain/rental_repository.dart';
 
 class DriftRentalRepository implements RentalRepository {
   DriftRentalRepository(
@@ -48,7 +41,15 @@ class DriftRentalRepository implements RentalRepository {
     final statement = database.select(database.rentals)
       ..orderBy([(table) => OrderingTerm.desc(table.rentedAt)]);
     if (status != null) {
-      statement.where((table) => table.status.equals(status.name));
+      if (status == RentalStatus.active) {
+        statement.where(
+          (table) =>
+              table.status.equals(RentalStatus.active.name) |
+              table.status.equals(RentalStatus.partiallyReturned.name),
+        );
+      } else {
+        statement.where((table) => table.status.equals(status.name));
+      }
     }
     return statement.watch().asyncMap((rows) async {
       final result = <RentalDetails>[];
@@ -461,6 +462,550 @@ class DriftRentalRepository implements RentalRepository {
   }
 
   @override
+  Future<CustomerHeldItems> getCustomerHeldItems(String customerId) async {
+    final customer = await (database.select(
+      database.customers,
+    )..where((t) => t.id.equals(customerId))).getSingleOrNull();
+    final customerName = customer?.fullName ?? '';
+
+    final customerRentals =
+        await (database.select(database.rentals)
+              ..where(
+                (t) =>
+                    t.customerId.equals(customerId) &
+                    (t.status.equals(RentalStatus.active.name) |
+                        t.status.equals(RentalStatus.partiallyReturned.name)),
+              )
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.rentedAt),
+                (t) => OrderingTerm.asc(t.rentalNumber),
+              ]))
+            .get();
+
+    if (customerRentals.isEmpty) {
+      return CustomerHeldItems(
+        customerId: customerId,
+        customerName: customerName,
+        materials: const [],
+      );
+    }
+
+    final rentalMap = {for (final r in customerRentals) r.id: r};
+    final rentalIds = rentalMap.keys.toList();
+    final itemRows = await (database.select(
+      database.rentalItems,
+    )..where((t) => t.rentalId.isIn(rentalIds))).get();
+
+    final nowUtc = clock.now().toUtc();
+    final offset = localOffset ?? DateTime.now().timeZoneOffset;
+
+    final linesByMaterial = <String, List<CustomerHeldRentalLine>>{};
+    final materialNames = <String, String>{};
+
+    for (final item in itemRows) {
+      final outstanding = item.quantity - item.quantityReturned;
+      if (outstanding > 0) {
+        final rental = rentalMap[item.rentalId]!;
+        final daysSoFar = billableDays(
+          rental.rentedAt,
+          nowUtc,
+          localOffset: offset,
+        );
+        final line = CustomerHeldRentalLine(
+          rentalId: rental.id,
+          rentalNumber: rental.rentalNumber,
+          rentalItemId: item.id,
+          materialId: item.materialTypeId,
+          materialName: item.materialNameSnapshot,
+          rentedAt: rental.rentedAt.toUtc(),
+          outstandingQuantity: outstanding,
+          daysSoFar: daysSoFar,
+          pricePerDaySnapshot: item.pricePerDaySnapshot,
+        );
+        linesByMaterial.putIfAbsent(item.materialTypeId, () => []).add(line);
+        materialNames[item.materialTypeId] = item.materialNameSnapshot;
+      }
+    }
+
+    final materials = <CustomerHeldMaterial>[];
+    for (final entry in linesByMaterial.entries) {
+      // Sort lines oldest first: rentedAt asc, then rentalNumber asc
+      entry.value.sort((a, b) {
+        final cmp = a.rentedAt.compareTo(b.rentedAt);
+        if (cmp != 0) return cmp;
+        return a.rentalNumber.compareTo(b.rentalNumber);
+      });
+      final totalOutstanding = entry.value.fold<int>(
+        0,
+        (sum, l) => sum + l.outstandingQuantity,
+      );
+      materials.add(
+        CustomerHeldMaterial(
+          materialId: entry.key,
+          materialName: materialNames[entry.key] ?? '',
+          totalOutstanding: totalOutstanding,
+          lines: entry.value,
+        ),
+      );
+    }
+
+    materials.sort(
+      (a, b) =>
+          a.materialName.toLowerCase().compareTo(b.materialName.toLowerCase()),
+    );
+
+    return CustomerHeldItems(
+      customerId: customerId,
+      customerName: customerName,
+      materials: materials,
+    );
+  }
+
+  @override
+  Stream<CustomerHeldItems> watchCustomerHeldItems(String customerId) {
+    return database
+        .select(database.rentalItems)
+        .watch()
+        .asyncMap((_) => getCustomerHeldItems(customerId));
+  }
+
+  @override
+  Stream<List<CustomerHoldingItemsSummary>> watchCustomersHoldingItems({
+    String query = '',
+  }) {
+    return database
+        .select(database.rentalItems)
+        .watch()
+        .asyncMap((_) => _getCustomersHoldingItems(query: query));
+  }
+
+  Future<List<CustomerHoldingItemsSummary>> _getCustomersHoldingItems({
+    String query = '',
+  }) async {
+    final activeRentals =
+        await (database.select(database.rentals)..where(
+              (t) =>
+                  t.status.equals(RentalStatus.active.name) |
+                  t.status.equals(RentalStatus.partiallyReturned.name),
+            ))
+            .get();
+    if (activeRentals.isEmpty) return const [];
+
+    final rentalIds = activeRentals.map((r) => r.id).toSet();
+    final items = await (database.select(
+      database.rentalItems,
+    )..where((t) => t.rentalId.isIn(rentalIds))).get();
+
+    final rentalToCustomer = {
+      for (final r in activeRentals) r.id: r.customerId,
+    };
+    final unitsPerCustomer = <String, int>{};
+    for (final item in items) {
+      final outstanding = item.quantity - item.quantityReturned;
+      if (outstanding > 0) {
+        final custId = rentalToCustomer[item.rentalId];
+        if (custId != null) {
+          unitsPerCustomer[custId] =
+              (unitsPerCustomer[custId] ?? 0) + outstanding;
+        }
+      }
+    }
+
+    if (unitsPerCustomer.isEmpty) return const [];
+
+    final customers = await (database.select(
+      database.customers,
+    )..where((t) => t.id.isIn(unitsPerCustomer.keys))).get();
+
+    final normalized = query.toLowerCase().trim();
+    final results = <CustomerHoldingItemsSummary>[];
+    for (final c in customers) {
+      final total = unitsPerCustomer[c.id] ?? 0;
+      if (total <= 0) continue;
+      final matchesQuery =
+          normalized.isEmpty ||
+          c.fullName.toLowerCase().contains(normalized) ||
+          c.phone.toLowerCase().contains(normalized) ||
+          c.address.toLowerCase().contains(normalized);
+      if (matchesQuery) {
+        results.add(
+          CustomerHoldingItemsSummary(
+            customerId: c.id,
+            customerName: c.fullName,
+            phone: c.phone,
+            address: c.address,
+            totalUnitsHeld: total,
+          ),
+        );
+      }
+    }
+    results.sort(
+      (a, b) =>
+          a.customerName.toLowerCase().compareTo(b.customerName.toLowerCase()),
+    );
+    return results;
+  }
+
+  @override
+  Future<CustomerReturnReceipt> recordCustomerReturn({
+    required String customerId,
+    required List<ReturnAllocationLine> allocations,
+    String? note,
+  }) async {
+    final activeAllocations = allocations.where((a) => a.quantity > 0).toList();
+    if (activeAllocations.isEmpty) {
+      throw const RentalValidationException(
+        'At least one return line is required.',
+      );
+    }
+
+    return database.transaction(() async {
+      final customer = await (database.select(
+        database.customers,
+      )..where((t) => t.id.equals(customerId))).getSingleOrNull();
+      if (customer == null) {
+        throw const RentalValidationException('Customer not found.');
+      }
+
+      final batchId = uuidV4();
+      final returnedAt = clock.now().toUtc();
+      final offset = localOffset ?? DateTime.now().timeZoneOffset;
+
+      // Group allocations by rentalId
+      final allocationsByRental = <String, List<ReturnAllocationLine>>{};
+      for (final alloc in activeAllocations) {
+        if (alloc.quantity < 1) {
+          throw const RentalValidationException(
+            'Each returned quantity must be at least 1.',
+          );
+        }
+        allocationsByRental.putIfAbsent(alloc.rentalId, () => []).add(alloc);
+      }
+
+      final allEvents = <ReturnEventRecord>[];
+      final resolvedAllocations = <ReturnAllocationLine>[];
+      var grandTotal = 0;
+
+      for (final entry in allocationsByRental.entries) {
+        final rentalId = entry.key;
+        final rentalAllocations = entry.value;
+
+        final rentalRow = await (database.select(
+          database.rentals,
+        )..where((t) => t.id.equals(rentalId))).getSingleOrNull();
+        if (rentalRow == null) {
+          throw const RentalValidationException('Rental not found.');
+        }
+        if (rentalRow.status == RentalStatus.voided.name) {
+          throw const RentalValidationException(
+            'A voided rental cannot be returned.',
+          );
+        }
+        if (rentalRow.status == RentalStatus.returned.name) {
+          throw const RentalValidationException(
+            'A fully returned rental cannot be returned again.',
+          );
+        }
+
+        final itemRows = await (database.select(
+          database.rentalItems,
+        )..where((t) => t.rentalId.equals(rentalId))).get();
+        final itemsById = {for (final item in itemRows) item.id: item};
+
+        final days = billableDays(
+          rentalRow.rentedAt,
+          returnedAt,
+          localOffset: offset,
+        );
+
+        final rentalEvents = <ReturnEventRecord>[];
+        final oldQuantities = <Map<String, Object?>>[];
+        var rentalTotal = 0;
+
+        for (final alloc in rentalAllocations) {
+          final item = itemsById[alloc.rentalItemId];
+          if (item == null) {
+            throw const RentalValidationException(
+              'Rental line does not belong to the rental.',
+            );
+          }
+          final outstanding = item.quantity - item.quantityReturned;
+          if (alloc.quantity > outstanding) {
+            throw RentalValidationException(
+              'Cannot return more than the outstanding quantity for '
+              '${item.materialNameSnapshot}.',
+            );
+          }
+
+          final amount = returnLineAmount(
+            quantity: alloc.quantity,
+            pricePerDaySnapshot: item.pricePerDaySnapshot,
+            days: days,
+          );
+
+          final event = ReturnEventRecord(
+            id: uuidV4(),
+            rentalId: rentalId,
+            rentalItemId: item.id,
+            quantity: alloc.quantity,
+            returnedAt: returnedAt,
+            billableDays: days,
+            amount: amount,
+            pricePerDaySnapshot: item.pricePerDaySnapshot,
+            conditionNote: note == null || note.trim().isEmpty
+                ? null
+                : note.trim(),
+            createdAt: returnedAt,
+            returnBatchId: batchId,
+          );
+          rentalEvents.add(event);
+          allEvents.add(event);
+          rentalTotal += amount;
+          grandTotal += amount;
+
+          oldQuantities.add({
+            'rentalItemId': item.id,
+            'quantityReturned': item.quantityReturned,
+          });
+
+          await database
+              .into(database.returnEvents)
+              .insert(
+                db.ReturnEventsCompanion.insert(
+                  id: event.id,
+                  createdAt: returnedAt,
+                  updatedAt: returnedAt,
+                  rentalId: Value(event.rentalId),
+                  rentalItemId: event.rentalItemId,
+                  quantity: event.quantity,
+                  returnedAt: event.returnedAt,
+                  conditionNote: Value(event.conditionNote),
+                  billableDays: event.billableDays,
+                  amount: event.amount,
+                  pricePerDaySnapshot: Value(event.pricePerDaySnapshot),
+                  returnBatchId: Value(batchId),
+                ),
+              );
+
+          await (database.update(
+            database.rentalItems,
+          )..where((t) => t.id.equals(item.id))).write(
+            db.RentalItemsCompanion(
+              quantityReturned: Value(item.quantityReturned + alloc.quantity),
+              updatedAt: Value(returnedAt),
+            ),
+          );
+
+          resolvedAllocations.add(
+            ReturnAllocationLine(
+              rentalId: rentalId,
+              rentalNumber: rentalRow.rentalNumber,
+              rentalItemId: item.id,
+              materialId: item.materialTypeId,
+              materialName: item.materialNameSnapshot,
+              rentedAt: rentalRow.rentedAt.toUtc(),
+              quantity: alloc.quantity,
+              pricePerDaySnapshot: item.pricePerDaySnapshot,
+              days: days,
+              amount: amount,
+            ),
+          );
+        }
+
+        // Update rental status
+        final updatedItems = await (database.select(
+          database.rentalItems,
+        )..where((t) => t.rentalId.equals(rentalId))).get();
+        final isFullyReturned = updatedItems.every(
+          (item) => item.quantityReturned >= item.quantity,
+        );
+        final status = isFullyReturned
+            ? RentalStatus.returned
+            : RentalStatus.partiallyReturned;
+
+        await (database.update(
+          database.rentals,
+        )..where((t) => t.id.equals(rentalId))).write(
+          db.RentalsCompanion(
+            status: Value(status.name),
+            updatedAt: Value(returnedAt),
+          ),
+        );
+
+        // Per-rental audit log
+        await database
+            .into(database.auditLogs)
+            .insert(
+              db.AuditLogsCompanion.insert(
+                id: uuidV4(),
+                createdAt: returnedAt,
+                updatedAt: returnedAt,
+                entityType: 'rental',
+                entityId: rentalId,
+                action: 'returnRecorded',
+                oldValue: Value(
+                  jsonEncode({
+                    'status': rentalRow.status,
+                    'lines': oldQuantities,
+                  }),
+                ),
+                newValue: Value(
+                  jsonEncode({
+                    'rentalNumber': rentalRow.rentalNumber,
+                    'returnedAt': returnedAt.toIso8601String(),
+                    'note': note,
+                    'status': status.name,
+                    'returnBatchId': batchId,
+                    'lines': rentalEvents
+                        .map(
+                          (e) => {
+                            'rentalItemId': e.rentalItemId,
+                            'quantity': e.quantity,
+                            'days': e.billableDays,
+                            'amount': e.amount,
+                          },
+                        )
+                        .toList(),
+                    'total': rentalTotal,
+                  }),
+                ),
+                at: returnedAt,
+                by: 'local-user',
+              ),
+            );
+      }
+
+      // Batch-level audit log
+      await database
+          .into(database.auditLogs)
+          .insert(
+            db.AuditLogsCompanion.insert(
+              id: uuidV4(),
+              createdAt: returnedAt,
+              updatedAt: returnedAt,
+              entityType: 'returnBatch',
+              entityId: batchId,
+              action: 'returnBatchRecorded',
+              newValue: Value(
+                jsonEncode({
+                  'batchId': batchId,
+                  'customerId': customerId,
+                  'returnedAt': returnedAt.toIso8601String(),
+                  'note': note,
+                  'total': grandTotal,
+                  'grandTotal': grandTotal,
+                  'eventCount': allEvents.length,
+                  'allocations': resolvedAllocations
+                      .map(
+                        (a) => {
+                          'rentalId': a.rentalId,
+                          'rentalNumber': a.rentalNumber,
+                          'rentalItemId': a.rentalItemId,
+                          'materialId': a.materialId,
+                          'materialName': a.materialName,
+                          'quantity': a.quantity,
+                          'days': a.days,
+                          'pricePerDaySnapshot': a.pricePerDaySnapshot,
+                          'amount': a.amount,
+                        },
+                      )
+                      .toList(),
+                }),
+              ),
+              at: returnedAt,
+              by: 'local-user',
+            ),
+          );
+
+      final remainingHeld = await getCustomerHeldItems(customerId);
+
+      return CustomerReturnReceipt(
+        batchId: batchId,
+        customerId: customerId,
+        customerName: customer.fullName,
+        returnedAt: returnedAt,
+        allocations: resolvedAllocations,
+        totalAmount: grandTotal,
+        remainingHeld: remainingHeld.materials,
+        events: allEvents,
+      );
+    });
+  }
+
+  @override
+  Future<CustomerReturnReceipt?> getReturnBatchSummary(String batchId) async {
+    final events =
+        await (database.select(database.returnEvents)
+              ..where((t) => t.returnBatchId.equals(batchId))
+              ..orderBy([(t) => OrderingTerm.asc(t.returnedAt)]))
+            .get();
+    if (events.isEmpty) return null;
+
+    final firstRentalId = events.first.rentalId;
+    final firstRental = await (database.select(
+      database.rentals,
+    )..where((t) => t.id.equals(firstRentalId))).getSingleOrNull();
+    if (firstRental == null) return null;
+
+    final customer = await (database.select(
+      database.customers,
+    )..where((t) => t.id.equals(firstRental.customerId))).getSingleOrNull();
+    if (customer == null) return null;
+
+    final rentalIds = events.map((e) => e.rentalId).toSet();
+    final rentals = await (database.select(
+      database.rentals,
+    )..where((t) => t.id.isIn(rentalIds))).get();
+    final rentalMap = {for (final r in rentals) r.id: r};
+
+    final itemIds = events.map((e) => e.rentalItemId).toSet();
+    final items = await (database.select(
+      database.rentalItems,
+    )..where((t) => t.id.isIn(itemIds))).get();
+    final itemMap = {for (final i in items) i.id: i};
+
+    final allocations = <ReturnAllocationLine>[];
+    var grandTotal = 0;
+
+    for (final e in events) {
+      final rental = rentalMap[e.rentalId];
+      final item = itemMap[e.rentalItemId];
+      if (rental != null && item != null) {
+        allocations.add(
+          ReturnAllocationLine(
+            rentalId: rental.id,
+            rentalNumber: rental.rentalNumber,
+            rentalItemId: item.id,
+            materialId: item.materialTypeId,
+            materialName: item.materialNameSnapshot,
+            rentedAt: rental.rentedAt.toUtc(),
+            quantity: e.quantity,
+            pricePerDaySnapshot: e.pricePerDaySnapshot,
+            days: e.billableDays,
+            amount: e.amount,
+          ),
+        );
+        if (e.voidedAt == null) {
+          grandTotal += e.amount;
+        }
+      }
+    }
+
+    final held = await getCustomerHeldItems(customer.id);
+
+    return CustomerReturnReceipt(
+      batchId: batchId,
+      customerId: customer.id,
+      customerName: customer.fullName,
+      returnedAt: events.first.returnedAt.toUtc(),
+      allocations: allocations,
+      totalAmount: grandTotal,
+      remainingHeld: held.materials,
+      events: events.map(_eventFromRow).toList(),
+    );
+  }
+
+  @override
   Stream<List<ReturnEventRecord>> watchReturnEvents(String rentalId) {
     return (database.select(database.returnEvents)
           ..where((table) => table.rentalId.equals(rentalId))
@@ -797,6 +1342,7 @@ class DriftRentalRepository implements RentalRepository {
         pricePerDaySnapshot: row.pricePerDaySnapshot,
         conditionNote: row.conditionNote,
         createdAt: row.createdAt.toUtc(),
+        returnBatchId: row.returnBatchId,
         voidedAt: row.voidedAt?.toUtc(),
         voidReason: row.voidReason,
       );

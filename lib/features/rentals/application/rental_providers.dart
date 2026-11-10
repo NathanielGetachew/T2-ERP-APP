@@ -4,7 +4,6 @@ import '../../../core/database/database_provider.dart';
 import '../../../core/utils/clock_provider.dart';
 import '../data/rental_repository.dart';
 import '../domain/rental.dart';
-import '../domain/rental_repository.dart';
 
 final rentalRepositoryProvider = Provider<RentalRepository>((ref) {
   return DriftRentalRepository(
@@ -77,6 +76,69 @@ final rentalAuditHistoryProvider = FutureProvider.autoDispose
       (ref, rentalId) =>
           ref.watch(rentalRepositoryProvider).getAuditHistory(rentalId),
     );
+
+final customerHeldItemsProvider = StreamProvider.autoDispose
+    .family<CustomerHeldItems, String>(
+      (ref, customerId) => ref
+          .watch(rentalRepositoryProvider)
+          .watchCustomerHeldItems(customerId),
+    );
+
+final customerHoldingItemsQueryProvider = StateProvider.autoDispose<String>(
+  (ref) => '',
+);
+
+final customersHoldingItemsProvider =
+    StreamProvider.autoDispose<List<CustomerHoldingItemsSummary>>((ref) {
+      final query = ref.watch(customerHoldingItemsQueryProvider);
+      return ref
+          .watch(rentalRepositoryProvider)
+          .watchCustomersHoldingItems(query: query);
+    });
+
+final returnBatchSummaryProvider = FutureProvider.autoDispose
+    .family<CustomerReturnReceipt?, String>(
+      (ref, batchId) =>
+          ref.watch(rentalRepositoryProvider).getReturnBatchSummary(batchId),
+    );
+
+final customerReturnControllerProvider =
+    AsyncNotifierProvider.autoDispose<CustomerReturnController, void>(
+      CustomerReturnController.new,
+    );
+
+class CustomerReturnController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<CustomerReturnReceipt> recordCustomerReturn({
+    required String customerId,
+    required List<ReturnAllocationLine> allocations,
+    String? note,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final receipt = await ref
+          .read(rentalRepositoryProvider)
+          .recordCustomerReturn(
+            customerId: customerId,
+            allocations: allocations,
+            note: note,
+          );
+      ref.invalidate(customerHeldItemsProvider(customerId));
+      ref.invalidate(customersHoldingItemsProvider);
+      ref.invalidate(activeRentalsProvider);
+      ref.invalidate(rentalsProvider);
+      ref.invalidate(rentalsByCustomerProvider(customerId));
+      ref.invalidate(monthlyRevenueProvider);
+      state = const AsyncData(null);
+      return receipt;
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+}
 
 class RentalEditorController extends AutoDisposeAsyncNotifier<void> {
   @override

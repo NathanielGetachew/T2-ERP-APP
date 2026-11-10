@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
-const appDatabaseSchemaVersion = 4;
+const appDatabaseSchemaVersion = 5;
 const appDatabaseFileName = 't2_rental.sqlite';
 
 @DataClassName('CustomerRow')
@@ -91,6 +91,7 @@ class ReturnEvents extends Table {
   IntColumn get amount => integer()();
   IntColumn get pricePerDaySnapshot =>
       integer().withDefault(const Constant(0))();
+  TextColumn get returnBatchId => text().nullable()();
   DateTimeColumn get voidedAt => dateTime().nullable()();
   TextColumn get voidReason => text().nullable()();
 
@@ -175,6 +176,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.addColumn(returnEvents, returnEvents.voidedAt);
         await m.addColumn(returnEvents, returnEvents.voidReason);
+      }
+      if (from < 5) {
+        await m.addColumn(returnEvents, returnEvents.returnBatchId);
       }
     },
   );

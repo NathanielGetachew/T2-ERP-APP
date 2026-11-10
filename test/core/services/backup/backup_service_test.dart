@@ -547,7 +547,10 @@ void main() {
     // Seed v3 data
     await seedTestData(v3Db, v3Docs);
 
-    // Rollback schema to version 3 by dropping v4 columns and setting PRAGMA user_version = 3
+    // Rollback schema to version 3 by dropping v4/v5 columns and setting PRAGMA user_version = 3
+    await v3Db.customStatement(
+      'ALTER TABLE return_events DROP COLUMN return_batch_id;',
+    );
     await v3Db.customStatement(
       'ALTER TABLE return_events DROP COLUMN voided_at;',
     );
@@ -625,12 +628,12 @@ void main() {
 
     await restoreService.restoreBackup(v3BackupFile, password);
 
-    // Check that user_version was migrated to 4
+    // Check that user_version was migrated to appDatabaseSchemaVersion
     final result = await targetDb
         .customSelect('PRAGMA user_version;')
         .getSingle();
     final migratedVersion = result.data['user_version'] as int;
-    expect(migratedVersion, equals(4));
+    expect(migratedVersion, equals(appDatabaseSchemaVersion));
 
     // Data should still exist
     final customers = await targetDb.select(targetDb.customers).get();

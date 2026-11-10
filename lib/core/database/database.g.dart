@@ -2680,6 +2680,17 @@ class $ReturnEventsTable extends ReturnEvents
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _returnBatchIdMeta = const VerificationMeta(
+    'returnBatchId',
+  );
+  @override
+  late final GeneratedColumn<String> returnBatchId = GeneratedColumn<String>(
+    'return_batch_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _voidedAtMeta = const VerificationMeta(
     'voidedAt',
   );
@@ -2715,6 +2726,7 @@ class $ReturnEventsTable extends ReturnEvents
     billableDays,
     amount,
     pricePerDaySnapshot,
+    returnBatchId,
     voidedAt,
     voidReason,
   ];
@@ -2821,6 +2833,15 @@ class $ReturnEventsTable extends ReturnEvents
         ),
       );
     }
+    if (data.containsKey('return_batch_id')) {
+      context.handle(
+        _returnBatchIdMeta,
+        returnBatchId.isAcceptableOrUnknown(
+          data['return_batch_id']!,
+          _returnBatchIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('voided_at')) {
       context.handle(
         _voidedAtMeta,
@@ -2886,6 +2907,10 @@ class $ReturnEventsTable extends ReturnEvents
         DriftSqlType.int,
         data['${effectivePrefix}price_per_day_snapshot'],
       )!,
+      returnBatchId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}return_batch_id'],
+      ),
       voidedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}voided_at'],
@@ -2915,6 +2940,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
   final int billableDays;
   final int amount;
   final int pricePerDaySnapshot;
+  final String? returnBatchId;
   final DateTime? voidedAt;
   final String? voidReason;
   const ReturnEventRow({
@@ -2929,6 +2955,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
     required this.billableDays,
     required this.amount,
     required this.pricePerDaySnapshot,
+    this.returnBatchId,
     this.voidedAt,
     this.voidReason,
   });
@@ -2948,6 +2975,9 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
     map['billable_days'] = Variable<int>(billableDays);
     map['amount'] = Variable<int>(amount);
     map['price_per_day_snapshot'] = Variable<int>(pricePerDaySnapshot);
+    if (!nullToAbsent || returnBatchId != null) {
+      map['return_batch_id'] = Variable<String>(returnBatchId);
+    }
     if (!nullToAbsent || voidedAt != null) {
       map['voided_at'] = Variable<DateTime>(voidedAt);
     }
@@ -2972,6 +3002,9 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
       billableDays: Value(billableDays),
       amount: Value(amount),
       pricePerDaySnapshot: Value(pricePerDaySnapshot),
+      returnBatchId: returnBatchId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnBatchId),
       voidedAt: voidedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(voidedAt),
@@ -3000,6 +3033,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
       pricePerDaySnapshot: serializer.fromJson<int>(
         json['pricePerDaySnapshot'],
       ),
+      returnBatchId: serializer.fromJson<String?>(json['returnBatchId']),
       voidedAt: serializer.fromJson<DateTime?>(json['voidedAt']),
       voidReason: serializer.fromJson<String?>(json['voidReason']),
     );
@@ -3019,6 +3053,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
       'billableDays': serializer.toJson<int>(billableDays),
       'amount': serializer.toJson<int>(amount),
       'pricePerDaySnapshot': serializer.toJson<int>(pricePerDaySnapshot),
+      'returnBatchId': serializer.toJson<String?>(returnBatchId),
       'voidedAt': serializer.toJson<DateTime?>(voidedAt),
       'voidReason': serializer.toJson<String?>(voidReason),
     };
@@ -3036,6 +3071,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
     int? billableDays,
     int? amount,
     int? pricePerDaySnapshot,
+    Value<String?> returnBatchId = const Value.absent(),
     Value<DateTime?> voidedAt = const Value.absent(),
     Value<String?> voidReason = const Value.absent(),
   }) => ReturnEventRow(
@@ -3052,6 +3088,9 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
     billableDays: billableDays ?? this.billableDays,
     amount: amount ?? this.amount,
     pricePerDaySnapshot: pricePerDaySnapshot ?? this.pricePerDaySnapshot,
+    returnBatchId: returnBatchId.present
+        ? returnBatchId.value
+        : this.returnBatchId,
     voidedAt: voidedAt.present ? voidedAt.value : this.voidedAt,
     voidReason: voidReason.present ? voidReason.value : this.voidReason,
   );
@@ -3078,6 +3117,9 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
       pricePerDaySnapshot: data.pricePerDaySnapshot.present
           ? data.pricePerDaySnapshot.value
           : this.pricePerDaySnapshot,
+      returnBatchId: data.returnBatchId.present
+          ? data.returnBatchId.value
+          : this.returnBatchId,
       voidedAt: data.voidedAt.present ? data.voidedAt.value : this.voidedAt,
       voidReason: data.voidReason.present
           ? data.voidReason.value
@@ -3099,6 +3141,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
           ..write('billableDays: $billableDays, ')
           ..write('amount: $amount, ')
           ..write('pricePerDaySnapshot: $pricePerDaySnapshot, ')
+          ..write('returnBatchId: $returnBatchId, ')
           ..write('voidedAt: $voidedAt, ')
           ..write('voidReason: $voidReason')
           ..write(')'))
@@ -3118,6 +3161,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
     billableDays,
     amount,
     pricePerDaySnapshot,
+    returnBatchId,
     voidedAt,
     voidReason,
   );
@@ -3136,6 +3180,7 @@ class ReturnEventRow extends DataClass implements Insertable<ReturnEventRow> {
           other.billableDays == this.billableDays &&
           other.amount == this.amount &&
           other.pricePerDaySnapshot == this.pricePerDaySnapshot &&
+          other.returnBatchId == this.returnBatchId &&
           other.voidedAt == this.voidedAt &&
           other.voidReason == this.voidReason);
 }
@@ -3152,6 +3197,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
   final Value<int> billableDays;
   final Value<int> amount;
   final Value<int> pricePerDaySnapshot;
+  final Value<String?> returnBatchId;
   final Value<DateTime?> voidedAt;
   final Value<String?> voidReason;
   final Value<int> rowid;
@@ -3167,6 +3213,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
     this.billableDays = const Value.absent(),
     this.amount = const Value.absent(),
     this.pricePerDaySnapshot = const Value.absent(),
+    this.returnBatchId = const Value.absent(),
     this.voidedAt = const Value.absent(),
     this.voidReason = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3183,6 +3230,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
     required int billableDays,
     required int amount,
     this.pricePerDaySnapshot = const Value.absent(),
+    this.returnBatchId = const Value.absent(),
     this.voidedAt = const Value.absent(),
     this.voidReason = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3206,6 +3254,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
     Expression<int>? billableDays,
     Expression<int>? amount,
     Expression<int>? pricePerDaySnapshot,
+    Expression<String>? returnBatchId,
     Expression<DateTime>? voidedAt,
     Expression<String>? voidReason,
     Expression<int>? rowid,
@@ -3223,6 +3272,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
       if (amount != null) 'amount': amount,
       if (pricePerDaySnapshot != null)
         'price_per_day_snapshot': pricePerDaySnapshot,
+      if (returnBatchId != null) 'return_batch_id': returnBatchId,
       if (voidedAt != null) 'voided_at': voidedAt,
       if (voidReason != null) 'void_reason': voidReason,
       if (rowid != null) 'rowid': rowid,
@@ -3241,6 +3291,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
     Value<int>? billableDays,
     Value<int>? amount,
     Value<int>? pricePerDaySnapshot,
+    Value<String?>? returnBatchId,
     Value<DateTime?>? voidedAt,
     Value<String?>? voidReason,
     Value<int>? rowid,
@@ -3257,6 +3308,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
       billableDays: billableDays ?? this.billableDays,
       amount: amount ?? this.amount,
       pricePerDaySnapshot: pricePerDaySnapshot ?? this.pricePerDaySnapshot,
+      returnBatchId: returnBatchId ?? this.returnBatchId,
       voidedAt: voidedAt ?? this.voidedAt,
       voidReason: voidReason ?? this.voidReason,
       rowid: rowid ?? this.rowid,
@@ -3299,6 +3351,9 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
     if (pricePerDaySnapshot.present) {
       map['price_per_day_snapshot'] = Variable<int>(pricePerDaySnapshot.value);
     }
+    if (returnBatchId.present) {
+      map['return_batch_id'] = Variable<String>(returnBatchId.value);
+    }
     if (voidedAt.present) {
       map['voided_at'] = Variable<DateTime>(voidedAt.value);
     }
@@ -3325,6 +3380,7 @@ class ReturnEventsCompanion extends UpdateCompanion<ReturnEventRow> {
           ..write('billableDays: $billableDays, ')
           ..write('amount: $amount, ')
           ..write('pricePerDaySnapshot: $pricePerDaySnapshot, ')
+          ..write('returnBatchId: $returnBatchId, ')
           ..write('voidedAt: $voidedAt, ')
           ..write('voidReason: $voidReason, ')
           ..write('rowid: $rowid')
@@ -5186,6 +5242,7 @@ typedef $$ReturnEventsTableCreateCompanionBuilder =
       required int billableDays,
       required int amount,
       Value<int> pricePerDaySnapshot,
+      Value<String?> returnBatchId,
       Value<DateTime?> voidedAt,
       Value<String?> voidReason,
       Value<int> rowid,
@@ -5203,6 +5260,7 @@ typedef $$ReturnEventsTableUpdateCompanionBuilder =
       Value<int> billableDays,
       Value<int> amount,
       Value<int> pricePerDaySnapshot,
+      Value<String?> returnBatchId,
       Value<DateTime?> voidedAt,
       Value<String?> voidReason,
       Value<int> rowid,
@@ -5269,6 +5327,11 @@ class $$ReturnEventsTableFilterComposer
 
   ColumnFilters<int> get pricePerDaySnapshot => $composableBuilder(
     column: $table.pricePerDaySnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get returnBatchId => $composableBuilder(
+    column: $table.returnBatchId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5347,6 +5410,11 @@ class $$ReturnEventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get returnBatchId => $composableBuilder(
+    column: $table.returnBatchId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get voidedAt => $composableBuilder(
     column: $table.voidedAt,
     builder: (column) => ColumnOrderings(column),
@@ -5410,6 +5478,11 @@ class $$ReturnEventsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get returnBatchId => $composableBuilder(
+    column: $table.returnBatchId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get voidedAt =>
       $composableBuilder(column: $table.voidedAt, builder: (column) => column);
 
@@ -5461,6 +5534,7 @@ class $$ReturnEventsTableTableManager
                 Value<int> billableDays = const Value.absent(),
                 Value<int> amount = const Value.absent(),
                 Value<int> pricePerDaySnapshot = const Value.absent(),
+                Value<String?> returnBatchId = const Value.absent(),
                 Value<DateTime?> voidedAt = const Value.absent(),
                 Value<String?> voidReason = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5476,6 +5550,7 @@ class $$ReturnEventsTableTableManager
                 billableDays: billableDays,
                 amount: amount,
                 pricePerDaySnapshot: pricePerDaySnapshot,
+                returnBatchId: returnBatchId,
                 voidedAt: voidedAt,
                 voidReason: voidReason,
                 rowid: rowid,
@@ -5493,6 +5568,7 @@ class $$ReturnEventsTableTableManager
                 required int billableDays,
                 required int amount,
                 Value<int> pricePerDaySnapshot = const Value.absent(),
+                Value<String?> returnBatchId = const Value.absent(),
                 Value<DateTime?> voidedAt = const Value.absent(),
                 Value<String?> voidReason = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5508,6 +5584,7 @@ class $$ReturnEventsTableTableManager
                 billableDays: billableDays,
                 amount: amount,
                 pricePerDaySnapshot: pricePerDaySnapshot,
+                returnBatchId: returnBatchId,
                 voidedAt: voidedAt,
                 voidReason: voidReason,
                 rowid: rowid,

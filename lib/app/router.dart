@@ -13,6 +13,9 @@ import '../features/rentals/presentation/rental_editor_screen.dart';
 import '../features/rentals/presentation/rentals_screen.dart';
 import '../features/rentals/presentation/return_screen.dart';
 import '../features/rentals/presentation/return_summary_screen.dart';
+import '../features/rentals/presentation/customer_return_screen.dart';
+import '../features/rentals/presentation/customer_return_batch_summary_screen.dart';
+import '../features/rentals/presentation/customers_holding_items_screen.dart';
 import '../features/rentals/domain/rental.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -100,6 +103,24 @@ GoRouter createAppRouter() => GoRouter(
       path: '/rentals/:id/return-summary',
       builder: (context, state) =>
           ReturnSummaryScreen(receipt: state.extra! as ReturnReceipt),
+    ),
+    GoRoute(
+      path: '/customers-holding-items',
+      builder: (context, state) => const CustomersHoldingItemsScreen(),
+    ),
+    GoRoute(
+      path: '/customer-return/batch/:batchId',
+      builder: (context, state) => CustomerReturnBatchSummaryScreen(
+        batchId: state.pathParameters['batchId']!,
+        initialReceipt: state.extra is CustomerReturnReceipt
+            ? state.extra as CustomerReturnReceipt
+            : null,
+      ),
+    ),
+    GoRoute(
+      path: '/customer-return/:customerId',
+      builder: (context, state) =>
+          CustomerReturnScreen(customerId: state.pathParameters['customerId']!),
     ),
   ],
 );

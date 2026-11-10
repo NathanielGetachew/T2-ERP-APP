@@ -67,6 +67,7 @@ class ReturnEventRecord {
     required this.pricePerDaySnapshot,
     required this.conditionNote,
     required this.createdAt,
+    this.returnBatchId,
     this.voidedAt,
     this.voidReason,
   });
@@ -81,6 +82,7 @@ class ReturnEventRecord {
   final int pricePerDaySnapshot;
   final String? conditionNote;
   final DateTime createdAt;
+  final String? returnBatchId;
   final DateTime? voidedAt;
   final String? voidReason;
 }
@@ -134,4 +136,121 @@ class AuditHistoryEntry {
   final String action;
   final DateTime at;
   final String description;
+}
+
+class CustomerHeldRentalLine {
+  const CustomerHeldRentalLine({
+    required this.rentalId,
+    required this.rentalNumber,
+    required this.rentalItemId,
+    required this.materialId,
+    required this.materialName,
+    required this.rentedAt,
+    required this.outstandingQuantity,
+    required this.daysSoFar,
+    required this.pricePerDaySnapshot,
+  });
+
+  final String rentalId;
+  final int rentalNumber;
+  final String rentalItemId;
+  final String materialId;
+  final String materialName;
+  final DateTime rentedAt;
+  final int outstandingQuantity;
+  final int daysSoFar;
+  final int pricePerDaySnapshot;
+}
+
+class CustomerHeldMaterial {
+  const CustomerHeldMaterial({
+    required this.materialId,
+    required this.materialName,
+    required this.totalOutstanding,
+    required this.lines,
+  });
+
+  final String materialId;
+  final String materialName;
+  final int totalOutstanding;
+  final List<CustomerHeldRentalLine> lines;
+}
+
+class CustomerHeldItems {
+  const CustomerHeldItems({
+    required this.customerId,
+    required this.customerName,
+    required this.materials,
+  });
+
+  final String customerId;
+  final String customerName;
+  final List<CustomerHeldMaterial> materials;
+
+  int get totalUnitsHeld =>
+      materials.fold(0, (sum, m) => sum + m.totalOutstanding);
+}
+
+class ReturnAllocationLine {
+  const ReturnAllocationLine({
+    required this.rentalId,
+    required this.rentalNumber,
+    required this.rentalItemId,
+    required this.materialId,
+    required this.materialName,
+    required this.rentedAt,
+    required this.quantity,
+    required this.pricePerDaySnapshot,
+    required this.days,
+    required this.amount,
+  });
+
+  final String rentalId;
+  final int rentalNumber;
+  final String rentalItemId;
+  final String materialId;
+  final String materialName;
+  final DateTime rentedAt;
+  final int quantity;
+  final int pricePerDaySnapshot;
+  final int days;
+  final int amount;
+}
+
+class CustomerReturnReceipt {
+  const CustomerReturnReceipt({
+    required this.batchId,
+    required this.customerId,
+    required this.customerName,
+    required this.returnedAt,
+    required this.allocations,
+    required this.totalAmount,
+    required this.remainingHeld,
+    required this.events,
+  });
+
+  final String batchId;
+  final String customerId;
+  final String customerName;
+  final DateTime returnedAt;
+  final List<ReturnAllocationLine> allocations;
+  final int totalAmount;
+  final List<CustomerHeldMaterial> remainingHeld;
+  final List<ReturnEventRecord> events;
+}
+
+class CustomerHoldingItemsSummary {
+  const CustomerHoldingItemsSummary({
+    required this.customerId,
+    required this.customerName,
+    required this.phone,
+    required this.address,
+    required this.totalUnitsHeld,
+  });
+
+  final String customerId;
+  final String customerName;
+  final String? phone;
+  final String address;
+  final int totalUnitsHeld;
 }

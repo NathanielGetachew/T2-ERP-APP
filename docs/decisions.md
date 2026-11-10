@@ -56,3 +56,13 @@
 - Long-running threshold: Configurable between 1 and 365 days (default 14), editable from Settings, and persisted to app storage.
 - Charting: Built with `fl_chart` using BarChart with responsive bar sizing, graceful zero/empty handling, ETB tooltips, and an accessible expandable monthly summary below the chart.
 
+# Phase 2B — Partial returns UX and Customer-level return flow
+
+- **Oldest-first default allocation**: When returning items across multiple rentals for a customer, units are allocated to the oldest open rental first (sorted by `rentedAt` ascending, then `rentalNumber` ascending). This matches customer/shop expectations and closes older open contracts earlier.
+- **Independent line billing**: Each allocated return line is billed using its own rental's `rentedAt` (calendar days between that rental date and the return date) and its own `pricePerDaySnapshot`. This ensures that previous price snapshots and individual rental durations are preserved correctly.
+- **Batch transaction with returnBatchId**: All return events created during a customer-level return share a single `returnBatchId` (UUID v4) and are saved in one atomic Drift transaction. If any line fails or exceeds outstanding, nothing is written. A batch-level audit log entry (`returnBatchRecorded`) references the batch ID, customer, grand total, and event count.
+- **Returns allowed for archived customers**: An archived customer is never blocked from returning items. The shop must always be able to accept materials back and settle billing regardless of the customer's active/archived state.
+- **Voiding remains per-event**: Voiding remains granular at the individual `ReturnEvent` level. A voided event preserves its `returnBatchId` and is shown muted/struck-through; voiding recalculates line outstanding and rental status.
+- **Customer Held Items calculation**: Active rentals (both `active` and `partiallyReturned`) contribute their non-zero `outstandingQuantity` per material. Voided rentals and voided return events are strictly excluded.
+
+

@@ -779,4 +779,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noActiveRentals => 'No active rentals';
+
+  @override
+  String rentedReturnedStillOut(
+    Object rented,
+    Object returned,
+    Object stillOut,
+  ) {
+    return 'Rented $rented | Returned $returned | Still out $stillOut';
+  }
+
+  @override
+  String returningOfRemaining(
+    Object remaining,
+    Object returning,
+    Object total,
+  ) {
+    return 'Returning $returning of $total | $remaining will remain out';
+  }
+
+  @override
+  String remainingOutAfterReturn(Object count) {
+    return '$count will remain out';
+  }
+
+  @override
+  String get itemsCurrentlyHeld => 'Items currently held';
+
+  @override
+  String get noItemsHeld => 'No items currently held';
+
+  @override
+  String get returnItems => 'Return items';
+
+  @override
+  String get selectCustomerToReturn => 'Select customer to return items';
+
+  @override
+  String get noCustomersHoldingItems => 'No customers currently hold items';
+
+  @override
+  String unitsHeld(Object count) {
+    return '$count units held';
+  }
+
+  @override
+  String get returnMore => 'Return more';
+
+  @override
+  String get backToCustomer => 'Back to customer';
+
+  @override
+  String get adjustAllocation => 'Adjust allocation';
+
+  @override
+  String get resetAllocation => 'Reset to oldest first';
+
+  @override
+  String batchOfItems(Object count) {
+    return 'Batch of $count items';
+  }
+
+  @override
+  String get batchReturnSummary => 'Batch return summary';
+
+  @override
+  String get stillHeldAfterReturn => 'Items still held by customer';
+
+  @override
+  String get allReturnedNoHeld =>
+      'All items returned — customer holds no materials';
+
+  @override
+  String daysSoFarCount(Object days) {
+    return '$days days so far';
+  }
+
+  @override
+  String allocationErrorTotalMismatch(Object allocated, Object total) {
+    return 'Allocated total ($allocated) must equal $total';
+  }
+
+  @override
+  String allocationErrorExceedsLine(Object max) {
+    return 'Cannot exceed line outstanding of $max';
+  }
+
+  @override
+  String fromRental(Object rentalNumber) {
+    return 'From $rentalNumber';
+  }
 }

@@ -15,6 +15,15 @@ class StockAvailabilityException implements Exception {
   String toString() => 'Requested $requested, but only $available available.';
 }
 
+class RentalValidationException implements Exception {
+  const RentalValidationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 abstract interface class RentalRepository {
   Stream<List<RentalDetails>> watchActive({String query = ''});
 
@@ -38,6 +47,22 @@ abstract interface class RentalRepository {
     List<ReturnLineInput> lines,
     String? note,
   );
+
+  Future<CustomerHeldItems> getCustomerHeldItems(String customerId);
+
+  Stream<CustomerHeldItems> watchCustomerHeldItems(String customerId);
+
+  Stream<List<CustomerHoldingItemsSummary>> watchCustomersHoldingItems({
+    String query = '',
+  });
+
+  Future<CustomerReturnReceipt> recordCustomerReturn({
+    required String customerId,
+    required List<ReturnAllocationLine> allocations,
+    String? note,
+  });
+
+  Future<CustomerReturnReceipt?> getReturnBatchSummary(String batchId);
 
   Stream<List<ReturnEventRecord>> watchReturnEvents(String rentalId);
 

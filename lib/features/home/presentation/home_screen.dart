@@ -327,6 +327,44 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
+            // Return Materials Shortcut Card
+            Card(
+              key: const ValueKey('home_return_shortcut'),
+              color: Colors.amber.shade50,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.amber.shade300, width: 1),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.amber.shade100,
+                  child: Icon(
+                    Icons.assignment_return_rounded,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+                title: Text(
+                  l10n.returnMaterials,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+                subtitle: Text(
+                  l10n.selectCustomerToReturn,
+                  style: TextStyle(color: Colors.amber.shade900, fontSize: 12),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Colors.amber.shade900,
+                ),
+                onTap: () => context.push('/customers-holding-items'),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             // Navigation Hub Grid
             Row(
               children: [

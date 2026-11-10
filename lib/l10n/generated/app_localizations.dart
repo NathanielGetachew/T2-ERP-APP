@@ -1520,6 +1520,136 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No active rentals'**
   String get noActiveRentals;
+
+  /// No description provided for @rentedReturnedStillOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Rented {rented} | Returned {returned} | Still out {stillOut}'**
+  String rentedReturnedStillOut(
+    Object rented,
+    Object returned,
+    Object stillOut,
+  );
+
+  /// No description provided for @returningOfRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Returning {returning} of {total} | {remaining} will remain out'**
+  String returningOfRemaining(Object remaining, Object returning, Object total);
+
+  /// No description provided for @remainingOutAfterReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} will remain out'**
+  String remainingOutAfterReturn(Object count);
+
+  /// No description provided for @itemsCurrentlyHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Items currently held'**
+  String get itemsCurrentlyHeld;
+
+  /// No description provided for @noItemsHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'No items currently held'**
+  String get noItemsHeld;
+
+  /// No description provided for @returnItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Return items'**
+  String get returnItems;
+
+  /// No description provided for @selectCustomerToReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Select customer to return items'**
+  String get selectCustomerToReturn;
+
+  /// No description provided for @noCustomersHoldingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers currently hold items'**
+  String get noCustomersHoldingItems;
+
+  /// No description provided for @unitsHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} units held'**
+  String unitsHeld(Object count);
+
+  /// No description provided for @returnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Return more'**
+  String get returnMore;
+
+  /// No description provided for @backToCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to customer'**
+  String get backToCustomer;
+
+  /// No description provided for @adjustAllocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust allocation'**
+  String get adjustAllocation;
+
+  /// No description provided for @resetAllocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to oldest first'**
+  String get resetAllocation;
+
+  /// No description provided for @batchOfItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch of {count} items'**
+  String batchOfItems(Object count);
+
+  /// No description provided for @batchReturnSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch return summary'**
+  String get batchReturnSummary;
+
+  /// No description provided for @stillHeldAfterReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Items still held by customer'**
+  String get stillHeldAfterReturn;
+
+  /// No description provided for @allReturnedNoHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'All items returned — customer holds no materials'**
+  String get allReturnedNoHeld;
+
+  /// No description provided for @daysSoFarCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days so far'**
+  String daysSoFarCount(Object days);
+
+  /// No description provided for @allocationErrorTotalMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated total ({allocated}) must equal {total}'**
+  String allocationErrorTotalMismatch(Object allocated, Object total);
+
+  /// No description provided for @allocationErrorExceedsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot exceed line outstanding of {max}'**
+  String allocationErrorExceedsLine(Object max);
+
+  /// No description provided for @fromRental.
+  ///
+  /// In en, this message translates to:
+  /// **'From {rentalNumber}'**
+  String fromRental(Object rentalNumber);
 }
 
 class _AppLocalizationsDelegate

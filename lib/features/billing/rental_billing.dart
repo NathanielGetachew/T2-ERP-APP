@@ -103,3 +103,138 @@ int rentalEstimate(
     return total + lineAmount(outstanding, line.pricePerDaySnapshot, days);
   });
 }
+
+List<ReturnAllocationLine> allocateReturnQuantityOldestFirst({
+  required List<CustomerHeldRentalLine> lines,
+  required int quantityToReturn,
+  required DateTime returnedAtUtc,
+  required Duration localOffset,
+}) {
+  if (quantityToReturn < 0) {
+    throw ArgumentError.value(
+      quantityToReturn,
+      'quantityToReturn',
+      'Cannot be negative.',
+    );
+  }
+  if (quantityToReturn == 0) {
+    return const [];
+  }
+  final totalOutstanding = lines.fold<int>(
+    0,
+    (sum, line) => sum + line.outstandingQuantity,
+  );
+  if (quantityToReturn > totalOutstanding) {
+    throw ArgumentError(
+      'Cannot return more than total outstanding quantity ($totalOutstanding).',
+    );
+  }
+
+  // Sort oldest first: by rentedAt ascending, then rentalNumber ascending
+  final sortedLines = List<CustomerHeldRentalLine>.from(lines)
+    ..sort((a, b) {
+      final dateCmp = a.rentedAt.compareTo(b.rentedAt);
+      if (dateCmp != 0) return dateCmp;
+      return a.rentalNumber.compareTo(b.rentalNumber);
+    });
+
+  var remaining = quantityToReturn;
+  final allocations = <ReturnAllocationLine>[];
+
+  for (final line in sortedLines) {
+    if (remaining <= 0) break;
+    final toTake = remaining < line.outstandingQuantity
+        ? remaining
+        : line.outstandingQuantity;
+    if (toTake > 0) {
+      final days = billableDays(
+        line.rentedAt,
+        returnedAtUtc,
+        localOffset: localOffset,
+      );
+      final amount = returnLineAmount(
+        quantity: toTake,
+        pricePerDaySnapshot: line.pricePerDaySnapshot,
+        days: days,
+      );
+      allocations.add(
+        ReturnAllocationLine(
+          rentalId: line.rentalId,
+          rentalNumber: line.rentalNumber,
+          rentalItemId: line.rentalItemId,
+          materialId: line.materialId,
+          materialName: line.materialName,
+          rentedAt: line.rentedAt,
+          quantity: toTake,
+          pricePerDaySnapshot: line.pricePerDaySnapshot,
+          days: days,
+          amount: amount,
+        ),
+      );
+      remaining -= toTake;
+    }
+  }
+
+  return allocations;
+}
+
+List<ReturnAllocationLine> buildAllocationLinesFromCustomSplits({
+  required List<CustomerHeldRentalLine> lines,
+  required Map<String, int> splits,
+  required DateTime returnedAtUtc,
+  required Duration localOffset,
+}) {
+  final allocations = <ReturnAllocationLine>[];
+  for (final line in lines) {
+    final qty = splits[line.rentalItemId] ?? 0;
+    if (qty > 0) {
+      final days = billableDays(
+        line.rentedAt,
+        returnedAtUtc,
+        localOffset: localOffset,
+      );
+      final amount = returnLineAmount(
+        quantity: qty,
+        pricePerDaySnapshot: line.pricePerDaySnapshot,
+        days: days,
+      );
+      allocations.add(
+        ReturnAllocationLine(
+          rentalId: line.rentalId,
+          rentalNumber: line.rentalNumber,
+          rentalItemId: line.rentalItemId,
+          materialId: line.materialId,
+          materialName: line.materialName,
+          rentedAt: line.rentedAt,
+          quantity: qty,
+          pricePerDaySnapshot: line.pricePerDaySnapshot,
+          days: days,
+          amount: amount,
+        ),
+      );
+    }
+  }
+  return allocations;
+}
+
+String? validateManualAllocation({
+  required List<CustomerHeldRentalLine> lines,
+  required Map<String, int> splits,
+  required int expectedTotal,
+}) {
+  var total = 0;
+  for (final line in lines) {
+    final qty = splits[line.rentalItemId] ?? 0;
+    if (qty < 0) {
+      return 'Quantity cannot be negative.';
+    }
+    if (qty > line.outstandingQuantity) {
+      return 'Line for R-${line.rentalNumber.toString().padLeft(4, '0')} exceeds outstanding (${line.outstandingQuantity}).';
+    }
+    total += qty;
+  }
+  if (total != expectedTotal) {
+    return 'Total allocated ($total) does not match entered quantity ($expectedTotal).';
+  }
+  return null;
+}

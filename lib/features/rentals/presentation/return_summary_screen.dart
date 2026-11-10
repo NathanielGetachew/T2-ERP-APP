@@ -91,11 +91,26 @@ class ReturnSummaryScreen extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 24),
-          FilledButton(
-            onPressed: () => context.go('/rentals/${receipt.rental.id}'),
-            child: Text(l10n.backToRental),
-          ),
-          OutlinedButton(
+          if (receipt.remainingOutstanding.isNotEmpty) ...[
+            FilledButton.icon(
+              key: const ValueKey('return_more_button'),
+              onPressed: () =>
+                  context.push('/rentals/${receipt.rental.id}/return'),
+              icon: const Icon(Icons.assignment_return_outlined),
+              label: Text(l10n.returnMore),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => context.go('/rentals/${receipt.rental.id}'),
+              child: Text(l10n.backToRental),
+            ),
+          ] else
+            FilledButton(
+              onPressed: () => context.go('/rentals/${receipt.rental.id}'),
+              child: Text(l10n.backToRental),
+            ),
+          const SizedBox(height: 8),
+          TextButton(
             onPressed: () => context.go('/'),
             child: Text(l10n.backToHome),
           ),

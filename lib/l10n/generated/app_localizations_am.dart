@@ -767,4 +767,93 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get noActiveRentals => 'ምንም ንቁ ኪራይ የለም';
+
+  @override
+  String rentedReturnedStillOut(
+    Object rented,
+    Object returned,
+    Object stillOut,
+  ) {
+    return 'የተከራየ $rented | የተመለሰ $returned | ያልተመለሰ $stillOut';
+  }
+
+  @override
+  String returningOfRemaining(
+    Object remaining,
+    Object returning,
+    Object total,
+  ) {
+    return 'ከ $total ውስጥ $returning በመመለስ ላይ | $remaining ሳይመለሱ ይቀራሉ';
+  }
+
+  @override
+  String remainingOutAfterReturn(Object count) {
+    return '$count ሳይመለሱ ይቀራሉ';
+  }
+
+  @override
+  String get itemsCurrentlyHeld => 'በአሁኑ ጊዜ የተያዙ እቃዎች';
+
+  @override
+  String get noItemsHeld => 'በአሁኑ ጊዜ የተያዘ እቃ የለም';
+
+  @override
+  String get returnItems => 'እቃዎችን መመለስ';
+
+  @override
+  String get selectCustomerToReturn => 'እቃ የሚመልስ ደንበኛ ይምረጡ';
+
+  @override
+  String get noCustomersHoldingItems => 'በአሁኑ ጊዜ እቃ የያዘ ደንበኛ የለም';
+
+  @override
+  String unitsHeld(Object count) {
+    return '$count እቃዎች የተያዙ';
+  }
+
+  @override
+  String get returnMore => 'ተጨማሪ መልስ';
+
+  @override
+  String get backToCustomer => 'ወደ ደንበኛው ተመለስ';
+
+  @override
+  String get adjustAllocation => 'ክፍፍልን አስተካክል';
+
+  @override
+  String get resetAllocation => 'ወደ ቀደምት ቅደም ተከተል መልስ';
+
+  @override
+  String batchOfItems(Object count) {
+    return 'የ $count እቃዎች ስብስብ';
+  }
+
+  @override
+  String get batchReturnSummary => 'የስብስብ መመለሻ ማጠቃለያ';
+
+  @override
+  String get stillHeldAfterReturn => 'በደንበኛው እጅ የቀሩ እቃዎች';
+
+  @override
+  String get allReturnedNoHeld => 'ሁሉም እቃዎች ተመልሰዋል — በደንበኛው እጅ ምንም እቃ አልቀረም';
+
+  @override
+  String daysSoFarCount(Object days) {
+    return '$days ቀናት እስካሁን';
+  }
+
+  @override
+  String allocationErrorTotalMismatch(Object allocated, Object total) {
+    return 'የተከፋፈለው ድምር ($allocated) ከ $total ጋር እኩል መሆን አለበት';
+  }
+
+  @override
+  String allocationErrorExceedsLine(Object max) {
+    return 'ከመስመሩ ቀሪ ብዛት ($max) መብለጥ አይችልም';
+  }
+
+  @override
+  String fromRental(Object rentalNumber) {
+    return 'ከ $rentalNumber';
+  }
 }

@@ -148,12 +148,30 @@ class _ReturnScreenState extends ConsumerState<ReturnScreen> {
                 '${_formatDateTime(dialogContext, returnedAt)}',
               ),
               const SizedBox(height: 8),
-              ...selected.map(
-                (preview) => Text(
-                  '${preview.line.materialNameSnapshot}: '
-                  '${preview.quantity} · ${formatEtb(preview.amount)}',
-                ),
-              ),
+              ...selected.map((preview) {
+                final remaining =
+                    preview.line.outstandingQuantity - preview.quantity;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${preview.line.materialNameSnapshot}: '
+                        '${preview.quantity} · ${formatEtb(preview.amount)}',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        l10n.remainingOutAfterReturn(remaining),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(dialogContext).colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
               const SizedBox(height: 8),
               Text('${l10n.totalToPay}: ${formatEtb(total)}'),
             ],
@@ -220,7 +238,7 @@ class _ReturnPreview {
         );
 }
 
-class _ReturnLineCard extends StatelessWidget {
+class _ReturnLineCard extends StatefulWidget {
   const _ReturnLineCard({
     super.key,
     required this.line,
@@ -237,8 +255,50 @@ class _ReturnLineCard extends StatelessWidget {
   final VoidCallback onClear;
 
   @override
+  State<_ReturnLineCard> createState() => _ReturnLineCardState();
+}
+
+class _ReturnLineCardState extends State<_ReturnLineCard> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: '${widget.preview.quantity}');
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReturnLineCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.preview.quantity != widget.preview.quantity) {
+      if (_controller.text != '${widget.preview.quantity}') {
+        _controller.text = '${widget.preview.quantity}';
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTextChange(String value) {
+    final parsed = int.tryParse(value.trim());
+    if (parsed != null) {
+      final clamped = parsed.clamp(0, widget.line.outstandingQuantity);
+      widget.onQuantityChanged(clamped);
+    } else if (value.trim().isEmpty) {
+      widget.onQuantityChanged(0);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final remainingAfter =
+        widget.line.outstandingQuantity - widget.preview.quantity;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -246,49 +306,92 @@ class _ReturnLineCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              line.materialNameSnapshot,
+              widget.line.materialNameSnapshot,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            Text(l10n.rentedQuantity(line.quantity)),
-            Text(l10n.alreadyReturnedQuantity(line.quantityReturned)),
-            Text(l10n.outstandingQuantity(line.outstandingQuantity)),
+            Text(l10n.rentedQuantity(widget.line.quantity)),
+            Text(l10n.alreadyReturnedQuantity(widget.line.quantityReturned)),
+            Text(l10n.outstandingQuantity(widget.line.outstandingQuantity)),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer
+                    .withAlpha(50),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                l10n.returningOfRemaining(
+                  remainingAfter,
+                  widget.preview.quantity,
+                  widget.line.outstandingQuantity,
+                ),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 IconButton(
-                  key: ValueKey('return_decrease_${line.id}'),
-                  onPressed: preview.quantity > 0
-                      ? () => onQuantityChanged(preview.quantity - 1)
+                  key: ValueKey('return_decrease_${widget.line.id}'),
+                  onPressed: widget.preview.quantity > 0
+                      ? () => widget.onQuantityChanged(
+                          widget.preview.quantity - 1,
+                        )
                       : null,
                   icon: const Icon(Icons.remove),
                 ),
-                Text(
-                  '${preview.quantity}',
-                  style: Theme.of(context).textTheme.titleLarge,
+                SizedBox(
+                  width: 64,
+                  child: TextField(
+                    controller: _controller,
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 4,
+                      ),
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: _onTextChange,
+                  ),
                 ),
                 IconButton(
-                  key: ValueKey('return_increase_${line.id}'),
-                  onPressed: preview.quantity < line.outstandingQuantity
-                      ? () => onQuantityChanged(preview.quantity + 1)
+                  key: ValueKey('return_increase_${widget.line.id}'),
+                  onPressed:
+                      widget.preview.quantity < widget.line.outstandingQuantity
+                      ? () => widget.onQuantityChanged(
+                          widget.preview.quantity + 1,
+                        )
                       : null,
                   icon: const Icon(Icons.add),
                 ),
+                const SizedBox(width: 8),
                 TextButton(
-                  key: ValueKey('return_all_${line.id}'),
-                  onPressed: onReturnAll,
+                  key: ValueKey('return_all_${widget.line.id}'),
+                  onPressed: widget.onReturnAll,
                   child: Text(l10n.returnAll),
                 ),
                 TextButton(
-                  key: ValueKey('return_clear_${line.id}'),
-                  onPressed: onClear,
+                  key: ValueKey('return_clear_${widget.line.id}'),
+                  onPressed: widget.onClear,
                   child: Text(l10n.clear),
                 ),
               ],
             ),
+            const SizedBox(height: 4),
             Text(
               l10n.linePreview(
-                formatEtb(preview.amount),
-                preview.days,
-                formatEtb(line.pricePerDaySnapshot),
+                formatEtb(widget.preview.amount),
+                widget.preview.days,
+                formatEtb(widget.line.pricePerDaySnapshot),
               ),
             ),
           ],

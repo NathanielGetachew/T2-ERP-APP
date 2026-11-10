@@ -58,11 +58,12 @@ Feature-first layers: `lib/features/<feature>/{domain,data,application,presentat
 - **Stock check:** if a material has `totalStock`, exceeding available shows a warning; staff may confirm (recorded in the audit log as `stockOverrideConfirmed`).
 - **Revenue (earned)** = sum of return amounts grouped by the LOCAL month of `returnedAt`, excluding voided data.
 - **Voiding:** voiding a return restores outstanding quantities and recomputes status; a rental can be voided only after all its returns are voided; "Void and recreate" opens a prefilled new rental (new number, new time).
+- **Customer-level returns:** customers holding items across multiple open rentals can return items in a single customer-level flow. Quantities are allocated to the oldest open rental first (by `rentedAt`, then rental number) by default; staff can adjust allocations manually. Each line uses its own snapshot price and rental duration. All events share a `returnBatchId` and are committed atomically with per-rental and batch-level audit logs. Archived customers can return items.
 - Not in scope for the client: late fees, damage/loss charges, deposits, multi-user, cloud sync.
 
 ## 6. Progress
 
-Schema history (Drift `schemaVersion`): v1 base tables → v2 adds `Rentals.rentalNumber` (backfilled) → v3 `ReturnEvents` gets `rentalId`, `pricePerDaySnapshot`, `days`→`billableDays` → v4 (Phase 2A) void columns on `ReturnEvents`. Check `lib/core/database/database.dart` for the real current version and never edit earlier migration steps.
+Schema history (Drift `schemaVersion`): v1 base tables → v2 adds `Rentals.rentalNumber` (backfilled) → v3 `ReturnEvents` gets `rentalId`, `pricePerDaySnapshot`, `days`→`billableDays` → v4 (Phase 2A) void columns on `ReturnEvents` → v5 (Phase 2B) adds `return_batch_id` (nullable text) on `ReturnEvents`. Check `lib/core/database/database.dart` for the real current version and never edit earlier migration steps.
 
 | Slice | Status |
 |---|---|
@@ -73,7 +74,8 @@ Schema history (Drift `schemaVersion`): v1 base tables → v2 adds `Rentals.rent
 | 1D: Returns (full/partial), return summary, per-event days/amount, status transitions, Home "this month's revenue" (schema v3) | Done, committed, device-tested |
 | 2A: Void return / void rental with reason, void-and-recreate, audit history on rental details, voided filter | Done, committed, device-tested |
 | Encrypted Backup & Restore (zip of `VACUUM INTO` DB snapshot + private photos + manifest/SHA-256, AES-256-GCM chunked, password-derived key, share sheet, restore with safety copy and RESTORE confirmation, Home reminder banner if no backup within 7 days) | Done, committed |
-| **Phase 3: Dashboard & Analytics** (revenue per month chart `fl_chart`, average rental duration + 6-month trend, most rented materials ranking, currently out / long-running with configurable Settings threshold, customer insights, outstanding estimate, period filter, Home entry, full English/Amharic localization) | Done, verified with hand-computed arithmetic tests |
+| **Phase 3: Dashboard & Analytics** (revenue per month chart `fl_chart`, average rental duration + 6-month trend, most rented materials ranking, currently out / long-running with configurable Settings threshold, customer insights, outstanding estimate, period filter, Home entry, full English/Amharic localization) | Done, committed |
+| **Phase 2B: Partial Returns UX & Customer-level Return Flow** (Rented/Returned/Still-out line indicators, Partial badge, steppers/typing on return screen, customer profile "Items currently held" with return action, Home "Return materials" shortcut, customer picker, customer-level return screen with oldest-first allocation and manual adjustment, atomic batch transaction with `returnBatchId` [schema v5], batch summary receipt screen, full tests and localization) | Done, verified with hand-computed arithmetic tests |
 
 ## 7. Remaining roadmap (in order the owner agreed)
 

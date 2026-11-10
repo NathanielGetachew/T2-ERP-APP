@@ -46,3 +46,19 @@
   - Materials: Catalog cards with category tags, pricing rate badges, inventory counts, and status chips.
   - Settings: Categorized sections, clean language switch segments, long-running threshold parameter card, and encrypted backup card.
   - Dashboard: Gradient chart styling, responsive metric cards, and clean period filter chips.
+- Added Phase 2B partial returns UX and customer-level return flow:
+  - Part 1: Obvious partial returns on existing flows:
+    - Added "Rented X | Returned Y | Still out Z" indicator and "Partially returned" badge to rental lines on Rental Detail and Rentals list screens.
+    - Added -1/+1 steppers, direct typing, live preview, and "Returning X of Y | Z will remain out" banner to single-rental Return screen.
+    - Updated Return summary screen with "Return more" action when outstanding items remain.
+    - Added "Items currently held" section to Customer Profile showing all outstanding materials across open rentals with rental numbers, dates, days, and "Return items" action.
+  - Part 2: Customer-level return flow ("Return items"):
+    - Added "Return materials" shortcut card on Home navigating to customer picker (`/customers-holding-items`).
+    - Added customer picker listing only customers currently holding items with total units held.
+    - Added Customer Return screen (`/customer-return/:customerId`) with oldest-first allocation default, running grand total, locked time indicator, optional note, and manual allocation adjustment with per-line validation.
+    - Added schema migration 5 adding nullable `return_batch_id` column to `return_events` table.
+    - Implemented atomic `recordCustomerReturn` transaction saving all return events with shared `returnBatchId`, updating line returned quantities, transitioning rental status, and recording per-rental and batch-level audit logs.
+    - Added Customer Return Batch Summary screen (`/customer-return/batch/:batchId`) showing customer, timestamp, itemized allocation receipt, grand total, and items still held.
+    - Linked return events with batch IDs in rental history to their batch summaries.
+    - Added full English and Amharic localization for all new screens, dialogs, and error messages.
+    - Added comprehensive unit and widget tests covering hand-computed billing, oldest-first allocation, price snapshot preservation, validation, atomic rollback, and UI interactions.

@@ -238,6 +238,27 @@
   "periodSummary": "የጊዜው ማጠቃለያ",
   "noMaterialsRented": "በዚህ ጊዜ ውስጥ የተከራየ እቃ የለም",
   "noCustomersInPeriod": "በዚህ ጊዜ ውስጥ ደንበኞች የሉም",
-  "noActiveRentals": "ምንም ንቁ ኪራይ የለም"
+  "noActiveRentals": "ምንም ንቁ ኪራይ የለም",
+  "rentedReturnedStillOut": "የተከራየ {rented} | የተመለሰ {returned} | ያልተመለሰ {stillOut}",
+  "returningOfRemaining": "ከ {total} ውስጥ {returning} በመመለስ ላይ | {remaining} ሳይመለሱ ይቀራሉ",
+  "remainingOutAfterReturn": "{count} ሳይመለሱ ይቀራሉ",
+  "itemsCurrentlyHeld": "በአሁኑ ጊዜ የተያዙ እቃዎች",
+  "noItemsHeld": "በአሁኑ ጊዜ የተያዘ እቃ የለም",
+  "returnItems": "እቃዎችን መመለስ",
+  "selectCustomerToReturn": "እቃ የሚመልስ ደንበኛ ይምረጡ",
+  "noCustomersHoldingItems": "በአሁኑ ጊዜ እቃ የያዘ ደንበኛ የለም",
+  "unitsHeld": "{count} እቃዎች የተያዙ",
+  "returnMore": "ተጨማሪ መልስ",
+  "backToCustomer": "ወደ ደንበኛው ተመለስ",
+  "adjustAllocation": "ክፍፍልን አስተካክል",
+  "resetAllocation": "ወደ ቀደምት ቅደም ተከተል መልስ",
+  "batchOfItems": "የ {count} እቃዎች ስብስብ",
+  "batchReturnSummary": "የስብስብ መመለሻ ማጠቃለያ",
+  "stillHeldAfterReturn": "በደንበኛው እጅ የቀሩ እቃዎች",
+  "allReturnedNoHeld": "ሁሉም እቃዎች ተመልሰዋል — በደንበኛው እጅ ምንም እቃ አልቀረም",
+  "daysSoFarCount": "{days} ቀናት እስካሁን",
+  "allocationErrorTotalMismatch": "የተከፋፈለው ድምር ({allocated}) ከ {total} ጋር እኩል መሆን አለበት",
+  "allocationErrorExceedsLine": "ከመስመሩ ቀሪ ብዛት ({max}) መብለጥ አይችልም",
+  "fromRental": "ከ {rentalNumber}"
 }
 

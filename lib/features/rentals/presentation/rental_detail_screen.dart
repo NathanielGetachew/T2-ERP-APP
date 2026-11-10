@@ -120,19 +120,16 @@ class RentalDetailScreen extends ConsumerWidget {
               Text('${l10n.customer}: ${item.customerName}'),
               Text('${l10n.rentalDate}: ${rental.rentedAt.toLocal()}'),
               Text('${l10n.daysSoFar}: $days'),
-              Text('${l10n.status}: ${_statusLabel(l10n, rental.status)}'),
+              Row(
+                children: [
+                  Text('${l10n.status}: '),
+                  _StatusBadge(status: rental.status, l10n: l10n),
+                ],
+              ),
               const SizedBox(height: 16),
+              // Material lines with Rented | Returned | Still out
               ...item.lines.map(
-                (line) => Card(
-                  child: ListTile(
-                    title: Text(line.materialNameSnapshot),
-                    subtitle: Text(
-                      '${l10n.quantity}: ${line.quantity}\n'
-                      '${l10n.pricePerDay}: ${formatEtb(line.pricePerDaySnapshot)}\n'
-                      '${l10n.outstanding}: ${line.outstandingQuantity}',
-                    ),
-                  ),
-                ),
+                (line) => _RentalLineCard(line: line, l10n: l10n),
               ),
               const SizedBox(height: 16),
               Text(
@@ -143,44 +140,13 @@ class RentalDetailScreen extends ConsumerWidget {
                 Text(l10n.noReturnHistory)
               else
                 ...events.map(
-                  (event) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      _lineName(item, event),
-                      style: event.voidedAt == null
-                          ? null
-                          : const TextStyle(
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                    ),
-                    subtitle: Text(
-                      event.voidedAt == null
-                          ? l10n.returnHistoryLine(
-                              formatEtb(event.amount),
-                              _date(context, event.returnedAt),
-                              event.billableDays,
-                              _lineName(item, event),
-                              event.quantity,
-                            )
-                          : '${l10n.voidedAmount(formatEtb(event.amount))}\n'
-                                '${l10n.voidedReturnReason(event.voidReason ?? '')}',
-                    ),
-                    trailing: event.voidedAt == null
-                        ? PopupMenuButton<String>(
-                            onSelected: (_) => _showVoidDialog(
-                              context,
-                              ref,
-                              rentalId,
-                              event.id,
-                            ),
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'void',
-                                child: Text(l10n.voidReturn),
-                              ),
-                            ],
-                          )
-                        : Text(l10n.voided),
+                  (event) => _ReturnEventTile(
+                    event: event,
+                    item: item,
+                    rentalId: rentalId,
+                    l10n: l10n,
+                    context: context,
+                    ref: ref,
                   ),
                 ),
               const SizedBox(height: 16),
@@ -229,6 +195,168 @@ class RentalDetailScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// Card showing "Rented X | Returned Y | Still out Z" for one rental line.
+class _RentalLineCard extends StatelessWidget {
+  const _RentalLineCard({required this.line, required this.l10n});
+
+  final RentalLine line;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasPartial =
+        line.quantityReturned > 0 && line.outstandingQuantity > 0;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(line.materialNameSnapshot, style: theme.textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(
+              l10n.rentedReturnedStillOut(
+                line.quantity,
+                line.quantityReturned,
+                line.outstandingQuantity,
+              ),
+              style: TextStyle(
+                fontWeight: hasPartial ? FontWeight.bold : FontWeight.normal,
+                color: hasPartial ? theme.colorScheme.primary : null,
+              ),
+            ),
+            Text(
+              '${l10n.pricePerDay}: ${formatEtb(line.pricePerDaySnapshot)}',
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A single return event row in the detail screen, showing batch badge if applicable.
+class _ReturnEventTile extends StatelessWidget {
+  const _ReturnEventTile({
+    required this.event,
+    required this.item,
+    required this.rentalId,
+    required this.l10n,
+    required this.context,
+    required this.ref,
+  });
+
+  final ReturnEventRecord event;
+  final RentalDetails item;
+  final String rentalId;
+  final AppLocalizations l10n;
+  final BuildContext context;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext _) {
+    final isBatch = event.returnBatchId != null;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              _lineName(item, event),
+              style: event.voidedAt == null
+                  ? null
+                  : const TextStyle(decoration: TextDecoration.lineThrough),
+            ),
+          ),
+          if (isBatch)
+            GestureDetector(
+              onTap: event.voidedAt == null
+                  ? () => context.push(
+                      '/customer-return/batch/${event.returnBatchId}',
+                    )
+                  : null,
+              child: Chip(
+                key: ValueKey('batch_chip_${event.id}'),
+                padding: EdgeInsets.zero,
+                labelPadding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 0,
+                ),
+                label: Text(
+                  l10n.batchOfItems(1),
+                  style: const TextStyle(fontSize: 11),
+                ),
+                avatar: const Icon(Icons.link, size: 14),
+              ),
+            ),
+        ],
+      ),
+      subtitle: Text(
+        event.voidedAt == null
+            ? l10n.returnHistoryLine(
+                formatEtb(event.amount),
+                _date(context, event.returnedAt),
+                event.billableDays,
+                _lineName(item, event),
+                event.quantity,
+              )
+            : '${l10n.voidedAmount(formatEtb(event.amount))}\n'
+                  '${l10n.voidedReturnReason(event.voidReason ?? '')}',
+      ),
+      trailing: event.voidedAt == null
+          ? PopupMenuButton<String>(
+              onSelected: (_) =>
+                  _showVoidDialog(context, ref, rentalId, event.id),
+              itemBuilder: (context) => [
+                PopupMenuItem(value: 'void', child: Text(l10n.voidReturn)),
+              ],
+            )
+          : Text(l10n.voided),
+    );
+  }
+}
+
+/// A compact status badge chip.
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status, required this.l10n});
+
+  final RentalStatus status;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (status) {
+      RentalStatus.active => const Color(0xFF059669),
+      RentalStatus.partiallyReturned => const Color(0xFFD97706),
+      RentalStatus.returned => const Color(0xFF0284C7),
+      RentalStatus.voided => const Color(0xFFDC2626),
+    };
+    final label = switch (status) {
+      RentalStatus.active => l10n.active,
+      RentalStatus.partiallyReturned => l10n.partiallyReturned,
+      RentalStatus.returned => l10n.returned,
+      RentalStatus.voided => l10n.voided,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -318,13 +446,4 @@ String _lineName(RentalDetails details, ReturnEventRecord event) {
 String _date(BuildContext context, DateTime value) {
   final locale = Localizations.localeOf(context).toLanguageTag();
   return DateFormat.yMd(locale).add_jm().format(value.toLocal());
-}
-
-String _statusLabel(AppLocalizations l10n, RentalStatus status) {
-  return switch (status) {
-    RentalStatus.active => l10n.active,
-    RentalStatus.partiallyReturned => l10n.partiallyReturned,
-    RentalStatus.returned => l10n.returned,
-    RentalStatus.voided => l10n.voided,
-  };
 }

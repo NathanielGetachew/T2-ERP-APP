@@ -143,6 +143,8 @@ class _CustomerProfileState extends ConsumerState<_CustomerProfile> {
             ),
           ),
         const SizedBox(height: 24),
+        _CustomerHeldItemsSection(customerId: customer.id),
+        const SizedBox(height: 24),
         Text(l10n.rentalHistory, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
         rentalHistory.when(
@@ -395,6 +397,133 @@ class CustomerPhotoViewerScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _CustomerHeldItemsSection extends ConsumerWidget {
+  const _CustomerHeldItemsSection({required this.customerId});
+
+  final String customerId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final heldAsync = ref.watch(customerHeldItemsProvider(customerId));
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(l10n.itemsCurrentlyHeld, style: theme.textTheme.titleLarge),
+            heldAsync.maybeWhen(
+              data: (held) => held.totalUnitsHeld > 0
+                  ? FilledButton.icon(
+                      key: const ValueKey('customer_return_items_button'),
+                      onPressed: () =>
+                          context.push('/customer-return/$customerId'),
+                      icon: const Icon(
+                        Icons.assignment_return_outlined,
+                        size: 18,
+                      ),
+                      label: Text(l10n.returnItems),
+                    )
+                  : const SizedBox.shrink(),
+              orElse: () => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        heldAsync.when(
+          loading: () => const SizedBox.shrink(),
+          error: (e, _) => Text(e.toString()),
+          data: (held) {
+            if (held.materials.isEmpty) {
+              return Text(
+                l10n.noItemsHeld,
+                style: TextStyle(color: theme.colorScheme.outline),
+              );
+            }
+            return Column(
+              children: held.materials.map((mat) {
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              mat.materialName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                l10n.outstandingQuantity(mat.totalOutstanding),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 16),
+                        ...mat.lines.map((line) {
+                          final dateStr = line.rentedAt
+                              .toLocal()
+                              .toString()
+                              .split(' ')[0];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${formatRentalNumber(line.rentalNumber)} · $dateStr · ${l10n.daysSoFarCount(line.daysSoFar)}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '${line.outstandingQuantity} units',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 }
